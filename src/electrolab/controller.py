@@ -7,10 +7,12 @@ import time
 
 # Global variables
 port_ = 'XXX'
-baudRate = 115200
+baudRate = 123
+#global state
+state = 1
 
 class Setup:
-    def __init__(self, port, baud_rate)
+    def __init__(self, port, baud_rate):
         global port_
         port_ = port
         global baudRate
@@ -23,7 +25,8 @@ class Setup:
 
 class Motor:
     def __init__(self):
-        print('\n---')
+        pass
+        #print('\n---')
         #self.baud_rate = baud_rate
         #self.port = port
 
@@ -32,7 +35,7 @@ class Motor:
         #ser.readline()
         #ser.readline()
         #ser.readline()
-        print('Executing command')
+        print('Executing', message)
         ser.write(message)
         #print(ser.readline())
         #print(ser.readline())
@@ -45,71 +48,89 @@ class Dispense(Motor):
     '''
 
     def __init__(self, wait_time=[0,0,0,0]):
-        Motor.__init__()
+        self.wait_time = wait_time
+        Motor.__init__(self)
         #self.port = port
         #self.baud_rate = baud_rate
 
     def run(self):
-        initialization = '<PUMP1, 1000, -3900>'
-        remove_drip = '<PUMP1, 1000, +150>'
-        dispense = '<PUMP1, 1000, -9100>'
-        idle = '<PUMP1, 1000, +39000>'
+        global state
+        print('\nInitial state', state)
+        initialization = b'<PUMP1, 1000, -3900>'
+        remove_drip = b'<PUMP1, 1000, +150>'
+        dispense = b'<PUMP1, 1000, -9100>'
+        idle = b'<PUMP1, 1000, +39000>'
 
-        print('\nDispensing started')
+        print('Dispensing started')
         self.send(initialization)
-        time.time(wait_time[0])
+        time.sleep(self.wait_time[0])
         self.send(remove_drip)
-        time.time(wait_time[1])
+        time.sleep(self.wait_time[1])
         self.send(dispense)
-        time.time(wait_time[2])
+        time.sleep(self.wait_time[2])
         self.send(idle)
-        time.time(wait_time[3])
-        print('\nDispensing finished')
+        time.sleep(self.wait_time[3])
+        print('Dispensing finished')
+        #global state
+        state = 1
+        print('Final state', state)
 
 
 class Rinse(Motor):
     def __init__(self, wait_time=[0,0,0,0,0,0,0]):
-        Motor.__init()
+        self.wait_time = wait_time
+        Motor.__init__(self)
 
-    def run(self)
-        move_down = '<ZFLUSH, 100, +60000>'
-        move_up = '<ZFLUSH, 100, -60000>'
-        flush = '<DCPUMP1, 30, 1500>'
-        first_suc = '<DCPUMP2, 210, 30000>'
-        second_suc = '<DCPUMP2, 200, 1000>'
+    def run(self):
+        global state
+        print('\nInitial state', state)
+        move_down = b'<ZFLUSH, 100, +60000>'
+        move_up = b'<ZFLUSH, 100, -60000>'
+        flush = b'<DCPUMP1, 30, 1500>'
+        first_suc = b'<DCPUMP2, 210, 30000>'
+        second_suc = b'<DCPUMP2, 200, 1000>'
 
-        print('\nRinsing started')
+        print('Rinsing started')
         self.send(move_down) 
-        time.time(wait_time[0])
+        time.sleep(self.wait_time[0])
         self.send(flush)
-        time.time(wait_time[1])
+        time.sleep(self.wait_time[1])
         self.send(first_suc)
-        time.time(wait_time[2])
+        time.sleep(self.wait_time[2])
         self.send(move_up)
-        time.time(wait_time[3])
+        time.sleep(self.wait_time[3])
         self.send(move_down)
-        time.time(wait_time[4])
+        time.sleep(self.wait_time[4])
         self.send(second_suc)
-        time.time(wait_time[5])
+        time.sleep(self.wait_time[5])
         self.send(move_up)
-        time.time(wait_time[6])
-        print('\Rinsing finished')
+        time.sleep(self.wait_time[6])
+        print('Rinsing finished')
+        #global state
+        state = 2
+        print('Final state', state)
 
         
 class Dry(Motor):
     def __init__(self, wait_time=[0,0,0]):
-        Motor.__init__()
+        self.wait_time = wait_time
+        Motor.__init__(self)
 
     def run(self):
-        move_down = '<ZAIRDRY, 100, +30000>'
-        blast = '<DCPUMP3, 255, 30000>'
-        move_up = '<ZAIRDRY, 100, -30000>'
+        global state
+        print('\nInitial state', state)
+        move_down = b'<ZAIRDRY, 100, +30000>'
+        blast = b'<DCPUMP3, 255, 30000>'
+        move_up = b'<ZAIRDRY, 100, -30000>'
 
         print('Drying started')
         self.send(move_down)
-        time.time(wait_time[0])
+        time.sleep(self.wait_time[0])
         self.send(blast)
-        time.time(wait_time[1])
+        time.sleep(self.wait_time[1])
         self.send(move_up)
-        time.time(wait_time[2])
-        print('\nDrying finished')
+        time.sleep(self.wait_time[2])
+        print('Drying finished')
+        #global state
+        state = 3
+        print('Final state', state)

@@ -6,6 +6,7 @@ import numpy as np
 port_ = 'XXX'
 baudRate = 123
 state = 1 # Nozzle state (1: dispensing, 2: rinsing, 3: drying)
+nozzle_n = 1 # dispenser nozzle number
 position = 0 # Head position, 0: home, 1: cell 1, 2: cell2, etc
 move_speed = 1000 # Movement speed
 dx0 = 4400 # dx for the home position
@@ -14,6 +15,7 @@ dy = 2800
 head_12 = np.array([2160, 150])
 head_23 = np.array([-1740, -1140])
 head_13 = np.array([420, -990])
+nozzle12 = np.array([-50, 400])
 
 class Setup:
     def __init__(self, port, baud_rate=baudRate, speed=move_speed):
@@ -118,10 +120,9 @@ class Position_in_cell:
     def run(self):
         global position
         print('\nMoving to cell', self.cell)
-        print('from cell', position)
         self.move.run()
         position = self.cell
-        print(position)
+        #print(position)
 
 def parse_cell(cell):
     if cell == 0:
@@ -154,7 +155,7 @@ class Nozzle_change(Motor):
         global move_speed
         self.wait_time = wait_time
         coordinates = np.array([0,0])
-        print('\nChanging nozzle')
+        print('Changing nozzle')
         if state1 == 1 and state2 == 2:
             coordinates = head_12
         elif state1 == 2 and state2 == 1:
@@ -168,7 +169,7 @@ class Nozzle_change(Motor):
         elif state1 == 3 and state2 == 1:
             coordinates = -head_13
         elif state1 == state2:
-            print('Nozzle remaining in the same position')
+            print('Nozzle remained in the same position')
         else:
             print('Wrong coordinates for Nozzle_change')
 
@@ -182,18 +183,36 @@ class Nozzle_change(Motor):
         time.sleep(self.wait_time)
 
 
+def change_dispenser_nozzle(nozzle1, nozzle2, wait_time=1):
+    global nozzle12
+    global nozzle_n
+    print('\nChanging dispensing nozzle from ' + str(nozzle1) + ' to ' + str(nozzle2))
+    if nozzle1 == 1 and nozzle2 == 2:
+        coordinates = nozzle12
+        nozzle_n = 2
+    elif nozzle1 == 2 and nozzle2 ==1:
+        coordinates = -nozzle12
+        nozzle_n = 1
+    elif nozzle1 == nozzle2:
+       print('Dispensing nozzle remained in the same position')
+    else:
+        raise Exception('Select a correct dispensing nozzle number (1-2)')
+    
 
 class Dispense(Motor):
     '''
     '''
-    def __init__(self, wait_time=[0,0,0,0]):
+    def __init__(self, nozzle=1, wait_time=[0,0,0,0]):
         global state # This is the general state
+        global nozzle_n
+        self.nozzle = nozzle
         self.wait_time = wait_time
         Motor.__init__(self)
         self.state = 1 # This is the internal state
 
     def run(self):
         global state
+        change_dispenser_nozzle(nozzle_n, self.nozzle, wait_time=1)
         initialization = b'<PUMP1, 1000, -3900>'
         remove_drip = b'<PUMP1, 1000, +150>'
         dispense = b'<PUMP1, 1000, -9100>'

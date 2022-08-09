@@ -2,22 +2,15 @@ import serial
 import time
 import numpy as np
 
-#__options__ = ['X_STEPPER', 'Y_STEPPER', 'Z_STEPPER', 'Z_CLEANER', 'Z_ARGON', 
-#               'Z_DISPENSER', 'PUMP1_STEPPER', 'PUMP2_STEPPER', 'PUMP3_STEPPER',
-#               'PUMP4_STEPPER']
-
 # Global variables
 port_ = 'XXX'
 baudRate = 123
-
 state = 1 # Nozzle state (1: dispensing, 2: rinsing, 3: drying)
 position = 0 # Head position, 0: home, 1: cell 1, 2: cell2, etc
-
 move_speed = 1000 # Movement speed
 dx0 = 4400 # dx for the home position
 dx = 2000
 dy = 2800
-
 head_12 = np.array([2160, 150])
 head_23 = np.array([-1740, -1140])
 head_13 = np.array([420, -990])
@@ -51,6 +44,7 @@ class Motor:
 
 class Move(Motor):
     '''
+        This class may be redundant when used in Move_head
     '''
     def __init__(self, pos1, pos2):
         Motor.__init__(self)
@@ -93,10 +87,8 @@ class Move_head(Move):
         route = np.array([int(xB)-int(xA), int(yB)-int(yA)]) \
                 *np.array([dx,dy])
         if xA == '0':
-            #offset = dx0
             route[0] = route[0] + dx0 - dx
         elif xB == '0':
-            #offset = -dx0
             route[0] = route[0] - dx0 + dx
 
         messageX = '<X, ' + str(move_speed) + ', ' + str(route[0]) + '>'
@@ -104,11 +96,53 @@ class Move_head(Move):
         self.message = bytes(messageX + messageY, 'UTF-8')
 
     def run(self):
-        print('\nPositioning head')
+        print('Positioning head')
         self.send(self.message)
         time.sleep(self.wait_time)
 
       
+class Position_in_cell:
+    '''
+    '''
+
+    def __init__(self, cell, wait_time=1):
+        global position # This knows what cell we are now
+        self.cell = cell
+        cellA = parse_cell(position)
+        cellB = parse_cell(self.cell)
+        if isinstance(cellB, str):
+            raise Excpetion(cellB)
+        else:
+            self.move = Move_head(cellA, cellB, wait_time)
+
+    def run(self):
+        global position
+        print('\nMoving to cell', self.cell)
+        print('from cell', position)
+        self.move.run()
+        position = self.cell
+        print(position)
+
+def parse_cell(cell):
+    if cell == 0:
+        return 0
+    elif cell == 1:
+        return 11
+    elif cell == 2:
+        return 21
+    elif cell == 3:
+        return 31
+    elif cell == 4:
+        return 12
+    elif cell == 5:
+        return 22
+    elif cell == 6:
+        return 32
+    else:
+        return 'Cell number out of range (1-6)'
+
+
+
 class Nozzle_change(Motor):
     '''
     '''
@@ -157,11 +191,9 @@ class Dispense(Motor):
         self.wait_time = wait_time
         Motor.__init__(self)
         self.state = 1 # This is the internal state
-        #self.nozzle = Nozzle_change(state, self.state) # Move from general to internal
 
     def run(self):
         global state
-        #print('\nInitial state', state)
         initialization = b'<PUMP1, 1000, -3900>'
         remove_drip = b'<PUMP1, 1000, +150>'
         dispense = b'<PUMP1, 1000, -9100>'
@@ -179,7 +211,6 @@ class Dispense(Motor):
         time.sleep(self.wait_time[3])
         print('Dispensing finished')
         state = self.state
-        #print('Final state', state)
 
 
 class Rinse(Motor):
@@ -188,11 +219,9 @@ class Rinse(Motor):
         self.wait_time = wait_time
         Motor.__init__(self)
         self.state = 2
-        #self.nozzle = Nozzle_change(state, self.state)
 
     def run(self):
         global state
-        #print('\nInitial state', state)
         move_down = b'<ZFLUSH, 100, +60000>'
         move_up = b'<ZFLUSH, 100, -60000>'
         flush = b'<DCPUMP4, 80, 5000>'
@@ -213,7 +242,6 @@ class Rinse(Motor):
         time.sleep(self.wait_time[4])
         print('Rinsing finished')
         state = self.state
-        #print('Final state', state)
 
         
 class Dry(Motor):
@@ -222,11 +250,9 @@ class Dry(Motor):
         self.wait_time = wait_time
         Motor.__init__(self)
         self.state = 3
-        #self.nozzle = Nozzle_change(state, self.state)
 
     def run(self):
         global state
-        #print('\nInitial state', state)
         move_down = b'<ZAIRDRY, 100, +30000>'
         blast = b'<DCPUMP3, 255, 30000>'
         move_up = b'<ZAIRDRY, 100, -30000>'
@@ -241,4 +267,3 @@ class Dry(Motor):
         time.sleep(self.wait_time[2])
         print('Drying finished')
         state = self.state
-        #print('Final state', state)

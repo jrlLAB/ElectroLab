@@ -5,7 +5,7 @@ ElectroLab library
 
 from . import controller
 
-__version__ = "0.0.3"
+__version__ = "0.0.4"
 __author__ = 'Oliver Rodriguez, Nikita Lukhanin, Inkyu Oh, Michael Pence, Charles Schroeder, Joaquin Rodriguez-Lopez'
 
 # modules to import when user does 'from electrolab import *':

@@ -1,7 +1,7 @@
 # ElectroLab
 API to control the ElectroLab
 
-To install, go to src/electrolab/ and on a console execute:
+To install, clone this repository, open the console from within this directory and on a console execute:
 
 ```python
 pip install .

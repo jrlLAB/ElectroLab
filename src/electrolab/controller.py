@@ -18,6 +18,9 @@ head_13 = np.array([420, -990])
 nozzle12 = np.array([-50, 400])
 
 class Setup:
+    '''
+        - Here, test connection
+    '''
     def __init__(self, port, baud_rate=baudRate, speed=move_speed):
         global port_
         port_ = port
@@ -38,9 +41,14 @@ class Motor:
 
     def send(self, message):
         ser = serial.Serial(port_, baudRate)
-        #ser.readline()
+        ser.readline()
+        ser.readline()
+        ser.readline()
         print('Executing', message)
         ser.write(message)
+        ser.readline()
+        ser.readline()
+        ser.readline()
         ser.close()
         
 
@@ -213,10 +221,10 @@ class Dispense(Motor):
     def run(self):
         global state
         change_dispenser_nozzle(nozzle_n, self.nozzle, wait_time=1)
-        initialization = b'<PUMP1, 1000, -3900>'
-        remove_drip = b'<PUMP1, 1000, +150>'
-        dispense = b'<PUMP1, 1000, -9100>'
-        idle = b'<PUMP1, 1000, +39000>'
+        initialization = b'<PUMP1, 1000, +100>'
+        remove_drip = b'<PUMP1, 1000, +100>'
+        dispense = b'<PUMP1, 1000, -100>'
+        idle = b'<PUMP1, 1000, +100>'
 
         Nozzle_change(state, self.state)
         print('Dispensing started')

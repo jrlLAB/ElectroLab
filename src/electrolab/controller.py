@@ -10,12 +10,13 @@ nozzle_n = 1 # dispenser nozzle number
 position = 0 # Head position, 0: home, 1: cell 1, 2: cell2, etc
 move_speed = 1000 # Movement speed
 dx0 = 4400 # dx for the home position
+dy0 = 2800 # [220830] newly added
 dx = 2000
-dy = 2800
+dy = 4000 # [220830] previsouly 2800, but now 4000
 head_12 = np.array([2160, 150])
 head_23 = np.array([-1740, -1140])
 head_13 = np.array([420, -990])
-nozzle12 = np.array([-50, 400])
+nozzle12 = np.array([-350, 140]) # [220830] previsouly [-50, 400], but now [-350, 140]
 
 class Setup:
     '''
@@ -82,6 +83,7 @@ class Move_head(Move):
         global dx
         global dy
         global dx0
+        global dy0 # [220830] newly added
         offset = 0
         cellA = str(cellA)
         cellB = str(cellB)
@@ -98,8 +100,10 @@ class Move_head(Move):
                 *np.array([dx,dy])
         if xA == '0':
             route[0] = route[0] + dx0 - dx
+            route[1] = route[1] + dy0 - dy # [220830] newly added
         elif xB == '0':
             route[0] = route[0] - dx0 + dx
+            route[1] = route[1] - dy0 + dy # [220830] newly added
 
         messageX = '<X, ' + str(move_speed) + ', ' + str(route[0]) + '>'
         messageY = '<Y, ' + str(move_speed) + ', ' + str(route[1]) + '>'
@@ -121,7 +125,7 @@ class Position_in_cell:
         cellA = parse_cell(position)
         cellB = parse_cell(self.cell)
         if isinstance(cellB, str):
-            raise Excpetion(cellB)
+            raise Exception(cellB)
         else:
             self.move = Move_head(cellA, cellB, wait_time)
 
@@ -261,12 +265,14 @@ class Rinse(Motor):
         time.sleep(self.wait_time[0])
         self.send(flush)
         time.sleep(self.wait_time[1])
-        self.send(equil_flush)
-        time.sleep(self.wait_time[2])
         self.send(suc)
+        time.sleep(self.wait_time[2])
+        self.send(equil_flush)
         time.sleep(self.wait_time[3])
-        self.send(move_up)
+        self.send(suc)
         time.sleep(self.wait_time[4])
+        self.send(move_up)
+        time.sleep(self.wait_time[5]) # [220830] newly added
         print('Rinsing finished')
         state = self.state
 

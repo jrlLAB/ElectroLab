@@ -1,7 +1,7 @@
 import controller
 
 # General setup
-port = '/dev/ttyACM0'
+port = 'COM3'
 baud_rate = 115200
 controller.Setup(port, baud_rate)
 

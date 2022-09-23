@@ -214,32 +214,44 @@ def change_dispenser_nozzle(nozzle1, nozzle2, wait_time=1):
 class Dispense(Motor):
     '''
     '''
-    def __init__(self, nozzle=1, wait_time=[0,0,0,0]):
+    def __init__(self, nozzle=1, wait_time=[0,0,0,0], speed=1000, 
+                 motor_values=[100,-100,100,100]):
         global state # This is the general state
         global nozzle_n
         self.nozzle = nozzle
         self.wait_time = wait_time
+        self.speed = speed
+        self.motor_values = motor_values
         Motor.__init__(self)
         self.state = 1 # This is the internal state
 
     def run(self):
+        '''
+            wait_time = [1,0,4,0]
+            each number is the waiting time in s
+            if 0 then that command is not executed
+        '''
         global state
         change_dispenser_nozzle(nozzle_n, self.nozzle, wait_time=1)
-        initialization = b'<PUMP1, 1000, +100>'
-        remove_drip = b'<PUMP1, 1000, +100>'
-        dispense = b'<PUMP1, 1000, -100>'
-        idle = b'<PUMP1, 1000, +100>'
+        initialization = b'<PUMP1, ' + str(speed) + ', ' + str(motor_val[0]) +'>'
+        remove_drip = b'<PUMP1, ' + str(speed) + ', ' + str(motor_val[1]) + '>'
+        dispense = b'<PUMP1, ' + str(speed) + ', ' + str(motor_val[2]) + '>'
+        idle = b'<PUMP1, '+ str(speed) + ', ' + str(motor_val[3]) + '>'
 
         Nozzle_change(state, self.state)
         print('Dispensing started')
-        self.send(initialization)
-        time.sleep(self.wait_time[0])
-        self.send(remove_drip)
-        time.sleep(self.wait_time[1])
-        self.send(dispense)
-        time.sleep(self.wait_time[2])
-        self.send(idle)
-        time.sleep(self.wait_time[3])
+        if self.wait_time[0]:
+            self.send(initialization)
+            time.sleep(self.wait_time[0])
+        if self.wait_time[1]:
+            self.send(dispense)
+            time.sleep(self.wait_time[2])
+        if self.wait_time[2]:
+            self.send(remove_drip)
+            time.sleep(self.wait_time[1])
+        if self.wait_time[3]:
+            self.send(idle)
+            time.sleep(self.wait_time[3])
         print('Dispensing finished')
         state = self.state
 

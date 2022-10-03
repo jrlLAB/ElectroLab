@@ -42,14 +42,8 @@ class Motor:
 
     def send(self, message):
         ser = serial.Serial(port_, baudRate)
-        ser.readline()
-        ser.readline()
-        ser.readline()
         print('Executing', message)
         ser.write(message)
-        ser.readline()
-        ser.readline()
-        ser.readline()
         ser.close()
         
 
@@ -113,6 +107,7 @@ class Move_head(Move):
         print('Positioning head')
         self.send(self.message)
         time.sleep(self.wait_time)
+        print(self.message)
 
       
 class Position_in_cell:
@@ -134,7 +129,7 @@ class Position_in_cell:
         print('\nMoving to cell', self.cell)
         self.move.run()
         position = self.cell
-        #print(position)
+        print(position)
 
 def parse_cell(cell):
     if cell == 0:
@@ -232,11 +227,20 @@ class Dispense(Motor):
             if 0 then that command is not executed
         '''
         global state
+        speed = str(self.speed)
         change_dispenser_nozzle(nozzle_n, self.nozzle, wait_time=1)
-        initialization = b'<PUMP1, ' + str(speed) + ', ' + str(motor_val[0]) +'>'
-        remove_drip = b'<PUMP1, ' + str(speed) + ', ' + str(motor_val[1]) + '>'
-        dispense = b'<PUMP1, ' + str(speed) + ', ' + str(motor_val[2]) + '>'
-        idle = b'<PUMP1, '+ str(speed) + ', ' + str(motor_val[3]) + '>'
+        initialization = '<PUMP1, ' + speed + ', ' + \
+                         str(self.motor_values[0]) +'>'
+        remove_drip = '<PUMP1, ' + speed + ', ' + \
+                      str(self.motor_values[1]) + '>'
+        dispense = '<PUMP1, ' + speed + ', ' + \
+                   str(self.motor_values[2]) + '>'
+        idle = '<PUMP1, '+ speed + ', ' + \
+               str(self.motor_values[3]) + '>'
+        initialization = bytes(initialization, 'UTF-8')
+        remove_drip = bytes(remove_drip, 'UTF-8')
+        dispense = bytes(dispense, 'UTF-8')
+        idle = bytes(idle, 'UTF-8')
 
         Nozzle_change(state, self.state)
         print('Dispensing started')

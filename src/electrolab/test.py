@@ -1,12 +1,13 @@
 import controller
 
 # General setup
-port = 'COM3'
+port = '/dev/ttyACM0'
 baud_rate = 115200
 controller.Setup(port, baud_rate)
 
 ##### Positioning the head
-controller.Position_in_cell(3).run()
+pos = controller.Position_in_cell(3)
+pos.run()
 
 ##### Operation setup
 dispense = controller.Dispense(nozzle=2,wait_time=[1,1,1,1])

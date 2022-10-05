@@ -1,33 +1,46 @@
 import controller
 import time
-
-wait = 10
+import serial
 
 # General setup
 port = '/dev/ttyACM0'
 baud_rate = 115200
-controller.Setup(port, baud_rate)
+setup = controller.Setup(port, baud_rate)
+setup.connect()
 
-controller.Position_in_cell(1).run()
+#ser = serial.Serial(port, baud_rate)
+
+wait = 1
+
+move = controller.Motor()
+
+# Homming
+message_home = bytes('<homeGantry,0,0>', 'UTF-8')
+move.send(message_home)
 time.sleep(wait)
 
-dispense = controller.Dispense(nozzle=2,wait_time=[5,5,5,5])
-dispense.run()
-
-rinse = controller.Rinse(wait_time=[5,5,5,5,5])
-rinse.run()
+pos = controller.Position_in_cell(1)
+pos.run()
 time.sleep(wait)
 
-dry = controller.Dry(wait_time=[5,40,5])
-dry.run()
-
-controller.Position_in_cell(0).run()
+pos = controller.Position_in_cell(5)
+pos.run()
 time.sleep(wait)
 
-controller.change_dispenser_nozzle(controller.nozzle_n,1)
+pos = controller.Position_in_cell(1)
+pos.run()
 time.sleep(wait)
 
-motor = controller.Motor()
-motor.send(b'<X,1000,28000>')
 
+# Move positive
+mes1 = bytes('<Y,1000,1000>', 'UTF-8')
+move.send(mes1)
+time.sleep(wait)
+
+# Move negative
+mes2 = bytes('<Y,1000,-1000>', 'UTF-8')
+move.send(mes2)
+time.sleep(wait)
+
+setup.disconnect()
 print('Finished')

@@ -51,8 +51,8 @@ class Motor:
 
     def send(self, message):
         #ser = serial.Serial(port_, baudRate)
-        #print(ser.readline())
-        print('Executing', message)
+        print(ser.readline())
+        #print('Executing', message)
         ser.write(message)
         #ser.readline()
         #ser.readline()

@@ -5,6 +5,7 @@ import numpy as np
 # Global variables
 port_ = 'XXX'
 baudRate = 123
+ser = 0
 state = 1 # Nozzle state (1: dispensing, 2: rinsing, 3: drying)
 nozzle_n = 1 # dispenser nozzle number
 position = 0 # Head position, 0: home, 1: cell 1, 2: cell2, etc
@@ -34,6 +35,14 @@ class Setup:
         print('baud_rate: ', baudRate)
         print('Movement speed: ', move_speed)
         print('----------')
+
+    def connect(self):
+        global ser
+        ser = serial.Serial(port_, baudRate)
+        #print(ser.readline)
+        
+    def disconnect(self):
+        ser.close()
         
 
 class Motor:
@@ -41,10 +50,14 @@ class Motor:
         pass
 
     def send(self, message):
-        ser = serial.Serial(port_, baudRate)
+        #ser = serial.Serial(port_, baudRate)
+        #print(ser.readline())
         print('Executing', message)
         ser.write(message)
-        ser.close()
+        #ser.readline()
+        #ser.readline()
+        #ser.readline()
+        #ser.close()
         
 
 class Move(Motor):

@@ -6,7 +6,7 @@ import numpy as np
 port_ = 'XXX'
 baudRate = 123
 ser = 0
-state = 1 # Nozzle state (1: dispensing, 2: rinsing, 3: drying)
+state = 2 # Nozzle state (1: dispensing, 2: rinsing, 3: drying)
 nozzle_n = 1 # dispenser nozzle number
 position = 0 # Head position, 0: home, 1: cell 1, 2: cell2, etc
 move_speed = 1000 # Movement speed
@@ -125,6 +125,7 @@ class Move_head(Move):
       
 class Position_in_cell:
     '''
+        This positions the rinsing head into the cell
     '''
 
     def __init__(self, cell, wait_time=1):

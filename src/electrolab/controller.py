@@ -6,7 +6,7 @@ import numpy as np
 port_ = 'XXX'
 baudRate = 123
 ser = 0
-state = 1 # Nozzle state (1: dispensing, 2: rinsing, 3: drying)
+state = 2 # Nozzle state (1: dispensing, 2: rinsing, 3: drying)
 nozzle_n = 1 # dispenser nozzle number
 position = 0 # Head position, 0: home, 1: cell 1, 2: cell2, etc
 move_speed = 1000 # Movement speed
@@ -125,6 +125,7 @@ class Move_head(Move):
       
 class Position_in_cell:
     '''
+        This positions the rinsing head into the cell
     '''
 
     def __init__(self, cell, wait_time=1):
@@ -223,7 +224,7 @@ class Dispense(Motor):
     '''
     '''
     def __init__(self, nozzle=1, wait_time=[0,0,0,0], speed=1000, 
-                 motor_values=[100,-100,100,100]):
+                 motor_values=[10,10,10,10]):
         global state # This is the general state
         global nozzle_n
         self.nozzle = nozzle
@@ -274,7 +275,7 @@ class Dispense(Motor):
 
 
 class Rinse(Motor):
-    def __init__(self, wait_time=[0,0,0,0,0,0,0]):
+    def __init__(self, wait_time=[0,0,0,0,0,0]):
         global state
         self.wait_time = wait_time
         Motor.__init__(self)
@@ -284,17 +285,17 @@ class Rinse(Motor):
         global state
         move_down = b'<ZFLUSH, 100, +60000>'
         move_up = b'<ZFLUSH, 100, -60000>'
-        flush = b'<DCPUMP4, 80, 5000>'
-        equil_flush = b'<DCPUMP5, 255, 4000>'
-        suc = b'<DCPUMP2, 210, 10000>'
+        flush = b'<DC4, 80, 5000>'
+        equil_flush = b'<DC5, 255, 4000>'
+        suc = b'<DC2, 210, 20000>'
 
         Nozzle_change(state, self.state)
         print('Rinsing started')
         self.send(move_down) 
         time.sleep(self.wait_time[0])
-        self.send(flush)
-        time.sleep(self.wait_time[1])
         self.send(suc)
+        time.sleep(self.wait_time[1])
+        self.send(flush)
         time.sleep(self.wait_time[2])
         self.send(equil_flush)
         time.sleep(self.wait_time[3])
@@ -315,9 +316,9 @@ class Dry(Motor):
 
     def run(self):
         global state
-        move_down = b'<ZAIRDRY, 100, +30000>'
-        blast = b'<DCPUMP3, 255, 30000>'
-        move_up = b'<ZAIRDRY, 100, -30000>'
+        move_down = b'<ZAIRDRY, 100, +20000>'
+        blast = b'<DC3, 255, 30000>'
+        move_up = b'<ZAIRDRY, 100, -20000>'
 
         Nozzle_change(state, self.state)
         print('Drying started')

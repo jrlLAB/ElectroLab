@@ -167,15 +167,20 @@ def parse_cell(cell):
 
 class Nozzle_change(Motor):
     '''
+        state1: curent state
+        state2: new state
     '''
-    def __init__(self, state1, state2, wait_time=1):
+    def __init__(self, state1, state2, wait_time=3):
         Motor.__init__(self)
         global head_12
         global head_23
         global head_13
         global move_speed
+        global state
         self.wait_time = wait_time
         coordinates = np.array([0,0])
+        state = state2
+        print(state)
         print('Changing nozzle')
         if state1 == 1 and state2 == 2:
             coordinates = head_12
@@ -187,19 +192,23 @@ class Nozzle_change(Motor):
             coordinates = -head_23
         elif state1 == 1 and state2 == 3:
             coordinates = head_13
+            print('Dry?')
         elif state1 == 3 and state2 == 1:
             coordinates = -head_13
         elif state1 == state2:
             print('Nozzle remained in the same position')
+            state = state1
         else:
             print('Wrong coordinates for Nozzle_change')
+            state = state1
 
         messageX = '<X, ' + str(move_speed) + ', ' + str(coordinates[0]) + '>'
         messageY = '<Y, ' + str(move_speed) + ', ' + str(coordinates[1]) + '>'
         self.message = bytes(messageX + messageY, 'UTF-8')
-        self.run()
+        #self.run()
 
     def run(self):
+        print('Sending message')
         self.send(self.message)
         time.sleep(self.wait_time)
 
@@ -211,27 +220,49 @@ def change_dispenser_nozzle(nozzle1, nozzle2, wait_time=1):
     if nozzle1 == 1 and nozzle2 == 2:
         coordinates = nozzle12
         nozzle_n = 2
+        messageX = '<X, ' + str(move_speed) + ', ' + str(coordinates[0]) + '>'
+        messageY = '<Y, ' + str(move_speed) + ', ' + str(coordinates[1]) + '>'
+        message = bytes(messageX + messageY, 'UTF-8')
     elif nozzle1 == 2 and nozzle2 ==1:
         coordinates = -nozzle12
         nozzle_n = 1
+        messageX = '<X, ' + str(move_speed) + ', ' + str(coordinates[0]) + '>'
+        messageY = '<Y, ' + str(move_speed) + ', ' + str(coordinates[1]) + '>'
+        message = bytes(messageX + messageY, 'UTF-8')
     elif nozzle1 == nozzle2:
        print('Dispensing nozzle remained in the same position')
+       coordinates = nozzle12
+       message = bytes('', 'UTF-8')
     else:
         raise Exception('Select a correct dispensing nozzle number (1-2)')
-    
+    Motor().send(message)
 
 class Dispense(Motor):
     '''
+        User can specify the volume to dispense in uL. The calibrated motor_values
+        for the dispense operation is -9100, if a different value is needed
+        the class will override the volume and set the manual motor value directly
+
+        Pending: update wait_time according to volume
     '''
-    def __init__(self, nozzle=1, wait_time=[0,0,0,0], speed=1000, 
-                 motor_values=[10,10,10,10]):
-        global state # This is the general state
+    def __init__(self, nozzle=1, volume=1000, wait_time=[47,3,0,0], speed=1000, 
+                 motor_values=[-39000,150,-9100,39000]):
+        #global state # This is the general state
         global nozzle_n
         self.nozzle = nozzle
         self.wait_time = wait_time
         self.speed = speed
         self.motor_values = motor_values
         Motor.__init__(self)
+
+        # Will only occur if the calibrated value is used:
+        if self.motor_values[2] == -9100:
+            # Calibrated value to dispense 1 mL with a movement of -9100
+            slope = -9.1         
+            self.motor_values[2] = int(volume*slope)
+            self.wait_time[0] = 0
+            self.wait_time[2] = 11
+            
         self.state = 1 # This is the internal state
 
     def run(self):
@@ -240,93 +271,121 @@ class Dispense(Motor):
             each number is the waiting time in s
             if 0 then that command is not executed
         '''
-        global state
+        #global state
         speed = str(self.speed)
-        change_dispenser_nozzle(nozzle_n, self.nozzle, wait_time=1)
-        initialization = '<PUMP1, ' + speed + ', ' + \
-                         str(self.motor_values[0]) +'>'
-        remove_drip = '<PUMP1, ' + speed + ', ' + \
-                      str(self.motor_values[1]) + '>'
-        dispense = '<PUMP1, ' + speed + ', ' + \
-                   str(self.motor_values[2]) + '>'
-        idle = '<PUMP1, '+ speed + ', ' + \
-               str(self.motor_values[3]) + '>'
+        change_dispenser_nozzle(nozzle_n, self.nozzle, wait_time=3)
+        if nozzle_n == 1:
+            initialization = '<PUMP1, ' + speed + ', ' + \
+                             str(self.motor_values[0]) +'>'
+            remove_drip = '<PUMP1, ' + speed + ', ' + \
+                          str(self.motor_values[1]) + '>'
+            dispense = '<PUMP1, ' + speed + ', ' + \
+                       str(self.motor_values[2]) + '>'
+            idle = '<PUMP1, '+ speed + ', ' + \
+                   str(self.motor_values[3]) + '>'
+        elif nozzle_n == 2:
+            initialization = '<PUMP2, ' + speed + ', ' + \
+                             str(self.motor_values[0]) +'>'
+            remove_drip = '<PUMP2, ' + speed + ', ' + \
+                          str(self.motor_values[1]) + '>'
+            dispense = '<PUMP2, ' + speed + ', ' + \
+                       str(self.motor_values[2]) + '>'
+            idle = '<PUMP2, '+ speed + ', ' + \
+                   str(self.motor_values[3]) + '>'
+
         initialization = bytes(initialization, 'UTF-8')
         remove_drip = bytes(remove_drip, 'UTF-8')
         dispense = bytes(dispense, 'UTF-8')
         idle = bytes(idle, 'UTF-8')
 
-        Nozzle_change(state, self.state)
+        change = Nozzle_change(state, self.state)
+        change.run()
         print('Dispensing started')
         if self.wait_time[0]:
             self.send(initialization)
             time.sleep(self.wait_time[0])
         if self.wait_time[1]:
-            self.send(dispense)
-            time.sleep(self.wait_time[2])
-        if self.wait_time[2]:
             self.send(remove_drip)
             time.sleep(self.wait_time[1])
+        if self.wait_time[2]:
+            self.send(dispense)
+            time.sleep(self.wait_time[2])
         if self.wait_time[3]:
             self.send(idle)
             time.sleep(self.wait_time[3])
         print('Dispensing finished')
-        state = self.state
+        #state = self.state
+
+        change_dispenser_nozzle(nozzle_n, 1, wait_time=3)
 
 
 class Rinse(Motor):
-    def __init__(self, wait_time=[0,0,0,0,0,0]):
-        global state
+    def __init__(self, wait_time=[16,12,1.5,5,12,16]):
+        #global state
         self.wait_time = wait_time
         Motor.__init__(self)
         self.state = 2
 
     def run(self):
-        global state
+        #global state
         move_down = b'<ZFLUSH, 100, +60000>'
         move_up = b'<ZFLUSH, 100, -60000>'
         flush = b'<DC4, 80, 5000>'
         equil_flush = b'<DC5, 255, 4000>'
         suc = b'<DC2, 210, 20000>'
 
-        Nozzle_change(state, self.state)
+        change = Nozzle_change(state, self.state)
+        change.run()
         print('Rinsing started')
-        self.send(move_down) 
-        time.sleep(self.wait_time[0])
-        self.send(suc)
-        time.sleep(self.wait_time[1])
-        self.send(flush)
-        time.sleep(self.wait_time[2])
-        self.send(equil_flush)
-        time.sleep(self.wait_time[3])
-        self.send(suc)
-        time.sleep(self.wait_time[4])
-        self.send(move_up)
-        time.sleep(self.wait_time[5]) # [220830] newly added
+        if self.wait_time[0]:
+            self.send(move_down) 
+            time.sleep(self.wait_time[0])
+        if self.wait_time[1]:
+            self.send(suc)
+            time.sleep(self.wait_time[1])
+        if self.wait_time[2]:
+            self.send(flush)
+            time.sleep(self.wait_time[2])
+        if self.wait_time[3]:
+            self.send(equil_flush)
+            time.sleep(self.wait_time[3])
+        if self.wait_time[4]:
+            self.send(suc)
+            time.sleep(self.wait_time[4])
+        if self.wait_time[5]:
+            self.send(move_up)
+            time.sleep(self.wait_time[5]) # [220830] newly added
         print('Rinsing finished')
-        state = self.state
+        #state = self.state
 
         
 class Dry(Motor):
     def __init__(self, wait_time=[0,0,0]):
-        global state
+        #global state
         self.wait_time = wait_time
         Motor.__init__(self)
         self.state = 3
 
     def run(self):
-        global state
+        #global state
         move_down = b'<ZAIRDRY, 100, +20000>'
         blast = b'<DC3, 255, 30000>'
         move_up = b'<ZAIRDRY, 100, -20000>'
 
-        Nozzle_change(state, self.state)
+        print(state)
+        change = Nozzle_change(state, self.state)
+        change.run()
+        print(state)
+        #print(self.state)
         print('Drying started')
-        self.send(move_down)
-        time.sleep(self.wait_time[0])
-        self.send(blast)
-        time.sleep(self.wait_time[1])
-        self.send(move_up)
-        time.sleep(self.wait_time[2])
+        if self.wait_time[0]:
+            self.send(move_down)
+            time.sleep(self.wait_time[0])
+        if self.wait_time[1]:
+            self.send(blast)
+            time.sleep(self.wait_time[1])
+        if self.wait_time[2]:
+            self.send(move_up)
+            time.sleep(self.wait_time[2])
         print('Drying finished')
-        state = self.state
+        #state = self.state

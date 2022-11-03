@@ -13,11 +13,11 @@ move_speed = 1000 # Movement speed
 dx0 = 4400 # dx for the home position
 dy0 = 2800 # [220830] newly added
 dx = 2000
-dy = 4000 # [220830] previsouly 2800, but now 4000
+dy = 4000
 head_12 = np.array([2160, 150])
 head_23 = np.array([-1740, -1140])
 head_13 = np.array([420, -990])
-nozzle12 = np.array([-350, 140]) # [220830] previsouly [-50, 400], but now [-350, 140]
+nozzle12 = np.array([-100, 400]) # [221103] previsouly [-50, 400], and [-350, 140]
 
 class Setup:
     '''
@@ -320,7 +320,7 @@ class Dispense(Motor):
 
 
 class Rinse(Motor):
-    def __init__(self, wait_time=[16,12,1.5,5,12,16]):
+    def __init__(self, wait_time=[16,12,2,5,12,16]): # [221103] tune 2
         #global state
         self.wait_time = wait_time
         Motor.__init__(self)
@@ -330,7 +330,7 @@ class Rinse(Motor):
         #global state
         move_down = b'<ZFLUSH, 100, +60000>'
         move_up = b'<ZFLUSH, 100, -60000>'
-        flush = b'<DC4, 80, 5000>'
+        flush = b'<DC4, 80, 6000>' # [221103] tune 80
         equil_flush = b'<DC5, 255, 4000>'
         suc = b'<DC2, 210, 20000>'
 

@@ -2,8 +2,8 @@ import controller
 import time
 
 # General setup
-port = '/dev/ttyACM0' # Linux
-#port = 'COM3' # Windows
+#port = '/dev/ttyACM0' # Linux
+port = 'COM3' # Windows
 baud_rate = 115200
 
 setup = controller.Setup(port, baud_rate)
@@ -19,6 +19,11 @@ message_home = bytes('<homeGantry,0,0>', 'UTF-8')
 move.send(message_home)
 time.sleep(wait)
 
+print('\n----NOZZLES HOMING----')
+message_home2 = bytes('<homeDisp,0,0>', 'UTF-8')
+move.send(message_home2)
+time.sleep(wait+15)
+
 print('\n----Moving to cell 1----')
 pos = controller.Position_in_cell(1)
 pos.run()
@@ -31,21 +36,25 @@ print('\n----Dispense in cell 1 from Nozzle 1----')
 dispense = controller.Dispense(nozzle=1, volume=500)
 dispense.run()
 
-#print('\n----Rinse cell 1----')
-#rinse = controller.Rinse()
-#rinse.run()
+## print('\n----Rinse cell 1----')
+## rinse = controller.Rinse()
+## rinse.run()
 
-print('\n----Dry----')
-dry = controller.Dry(wait_time=[7,25,7])
-dry.run()
+## rinse_final = controller.Rinse(wait_time=[16,12,0,5,12,16])
+## rinse_final.run()
+
+# print('\n----Dry----')
+# dry = controller.Dry(wait_time=[7,25,7])
+# dry.run()
 
 print('\n----Dispense in cell 1 from Nozzle 2----')
 dispense = controller.Dispense(nozzle=2, volume=500)
 dispense.run()
 
-#print('\n----Rinse cell 1----')
-#rinse = controller.Rinse()
-#rinse.run()
+# originally commented
+print('\n----Rinse cell 1----')
+rinse = controller.Rinse()
+rinse.run()
 
 print('\n----Dry----')
 dry = controller.Dry(wait_time=[7,25,7])

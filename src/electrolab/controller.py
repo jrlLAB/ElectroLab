@@ -245,8 +245,8 @@ class Dispense(Motor):
 
         Pending: update wait_time according to volume
     '''
-    def __init__(self, nozzle=1, volume=1000, wait_time=[47,3,0,0], speed=1000, 
-                 motor_values=[-39000,150,-9100,39000]):
+    def __init__(self, nozzle=1, volume=1000, wait_time=[47,3,0,0,0], speed=1000, 
+                 motor_values=[-39000,150,-9100,150,39000]):
         #global state # This is the general state
         global nozzle_n
         self.nozzle = nozzle
@@ -281,8 +281,10 @@ class Dispense(Motor):
                           str(self.motor_values[1]) + '>'
             dispense = '<PUMP1, ' + speed + ', ' + \
                        str(self.motor_values[2]) + '>'
+            remove_drip2 = '<PUMP1, ' + speed + ', ' + \
+                          str(self.motor_values[3]) + '>'
             idle = '<PUMP1, '+ speed + ', ' + \
-                   str(self.motor_values[3]) + '>'
+                   str(self.motor_values[4]) + '>'
         elif nozzle_n == 2:
             initialization = '<PUMP2, ' + speed + ', ' + \
                              str(self.motor_values[0]) +'>'
@@ -290,11 +292,14 @@ class Dispense(Motor):
                           str(self.motor_values[1]) + '>'
             dispense = '<PUMP2, ' + speed + ', ' + \
                        str(self.motor_values[2]) + '>'
+            remove_drip2 = '<PUMP1, ' + speed + ', ' + \
+                          str(self.motor_values[3]) + '>'
             idle = '<PUMP2, '+ speed + ', ' + \
-                   str(self.motor_values[3]) + '>'
+                   str(self.motor_values[4]) + '>'
 
         initialization = bytes(initialization, 'UTF-8')
         remove_drip = bytes(remove_drip, 'UTF-8')
+        remove_drip2 = bytes(remove_drip2, 'UTF-8')
         dispense = bytes(dispense, 'UTF-8')
         idle = bytes(idle, 'UTF-8')
 
@@ -311,8 +316,11 @@ class Dispense(Motor):
             self.send(dispense)
             time.sleep(self.wait_time[2])
         if self.wait_time[3]:
-            self.send(idle)
+            self.send(remove_drip2)
             time.sleep(self.wait_time[3])
+        if self.wait_time[4]:
+            self.send(idle)
+            time.sleep(self.wait_time[4])
         print('Dispensing finished')
         #state = self.state
 

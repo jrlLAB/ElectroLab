@@ -255,13 +255,11 @@ class Dispense(Motor):
         self.motor_values = motor_values
         Motor.__init__(self)
 
-        # Will only occur if the calibrated value is used:
-        if self.motor_values[2] == -9100:
-            # Calibrated value to dispense 1 mL with a movement of -9100
-            slope = -9.1         
-            self.motor_values[2] = int(volume*slope)
-            self.wait_time[0] = 0
-            self.wait_time[2] = 11
+        # Calibrated value to dispense 1 mL with a movement of -9100 by default
+        slope = self.motor_values[2]/1000
+        self.motor_values[2] = int(volume*slope)
+        self.wait_time[0] = 0
+        self.wait_time[2] = abs(slope*volume*11/(9.1*1000))
             
         self.state = 1 # This is the internal state
 

@@ -10,14 +10,14 @@ state = 2 # Nozzle state (1: dispensing, 2: rinsing, 3: drying)
 nozzle_n = 1 # dispenser nozzle number
 position = 0 # Head position, 0: home, 1: cell 1, 2: cell2, etc
 move_speed = 1000 # Movement speed
-dx0 = 4400 # dx for the home position
+dx0 = 4350 # dx for the home position
 dy0 = 2800 # [220830] newly added
 dx = 2000
 dy = 4000
-head_12 = np.array([2160, 150])
+head_12 = np.array([1920, 400])
 head_23 = np.array([-1740, -1140])
-head_13 = np.array([420, -990])
-nozzle12 = np.array([-100, 400]) # [221103] previsouly [-50, 400], and [-350, 140]
+head_13 = np.array([100, -680]) # 120, -600
+nozzle12 = np.array([-280, 400]) # [221103] previsouly [-50, 400], and [-350, 140]
 
 class Setup:
     '''
@@ -246,7 +246,7 @@ class Dispense(Motor):
         Pending: update wait_time according to volume
     '''
     def __init__(self, nozzle=1, volume=1000, wait_time=[47,3,0,0,0], speed=1000, 
-                 motor_values=[-39000,150,-9100,150,39000]):
+                 motor_values=[-39000,80,-8530,80,39000]):
         #global state # This is the general state
         global nozzle_n
         self.nozzle = nozzle
@@ -290,7 +290,7 @@ class Dispense(Motor):
                           str(self.motor_values[1]) + '>'
             dispense = '<PUMP2, ' + speed + ', ' + \
                        str(self.motor_values[2]) + '>'
-            remove_drip2 = '<PUMP1, ' + speed + ', ' + \
+            remove_drip2 = '<PUMP2, ' + speed + ', ' + \
                           str(self.motor_values[3]) + '>'
             idle = '<PUMP2, '+ speed + ', ' + \
                    str(self.motor_values[4]) + '>'
@@ -326,7 +326,7 @@ class Dispense(Motor):
 
 
 class Rinse(Motor):
-    def __init__(self, wait_time=[16,12,2,5,12,16]): # [221103] tune 2
+    def __init__(self, wait_time=[16,12,3.5,20,12,16]): # [221206] tune 2 [16,12,3,10,12,16]
         #global state
         self.wait_time = wait_time
         Motor.__init__(self)
@@ -334,9 +334,9 @@ class Rinse(Motor):
 
     def run(self):
         #global state
-        move_down = b'<ZFLUSH, 100, +60000>'
-        move_up = b'<ZFLUSH, 100, -60000>'
-        flush = b'<DC4, 80, 6000>' # [221103] tune 80
+        move_down = b'<ZFLUSH, 100, +69500>'
+        move_up = b'<ZFLUSH, 100, -69500>'
+        flush = b'<DC4, 80, 5000>' # [221206] tune 80
         equil_flush = b'<DC5, 255, 4000>'
         suc = b'<DC2, 210, 20000>'
 
@@ -366,7 +366,7 @@ class Rinse(Motor):
 
         
 class Dry(Motor):
-    def __init__(self, wait_time=[0,0,0]):
+    def __init__(self, wait_time=[7,15,7]): # [221206] from [0,0,0]
         #global state
         self.wait_time = wait_time
         Motor.__init__(self)
@@ -374,9 +374,9 @@ class Dry(Motor):
 
     def run(self):
         #global state
-        move_down = b'<ZAIRDRY, 100, +20000>'
-        blast = b'<DC3, 255, 30000>'
-        move_up = b'<ZAIRDRY, 100, -20000>'
+        move_down = b'<ZAIRDRY, 100, +30000>'
+        blast = b'<DC3, 255, 30000>' # 30000
+        move_up = b'<ZAIRDRY, 100, -30000>'
 
         print(state)
         change = Nozzle_change(state, self.state)

@@ -334,8 +334,8 @@ class Rinse(Motor):
 
     def run(self):
         #global state
-        move_down = b'<ZFLUSH, 100, +69500>'
-        move_up = b'<ZFLUSH, 100, -69500>'
+        move_down = b'<ZFLUSH, 100, +69200>'
+        move_up = b'<ZFLUSH, 100, -69200>'
         flush = b'<DC4, 80, 5000>' # [221206] tune 80
         equil_flush = b'<DC5, 255, 4000>'
         suc = b'<DC2, 210, 20000>'
@@ -366,7 +366,7 @@ class Rinse(Motor):
 
         
 class Dry(Motor):
-    def __init__(self, wait_time=[7,15,7]): # [221206] from [0,0,0]
+    def __init__(self, wait_time=[7,20,7]): # [221206] from [0,0,0]
         #global state
         self.wait_time = wait_time
         Motor.__init__(self)

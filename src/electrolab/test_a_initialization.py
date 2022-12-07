@@ -19,18 +19,17 @@ move = controller.Motor()
 print('\n----GANTRY HOMING----')
 message_home1 = bytes('<homeGantry,0,0>', 'UTF-8')
 move.send(message_home1)
+time.sleep(wait+5)
 
 print('\n----NOZZLES HOMING----')
 message_home2 = bytes('<homeDisp,0,0>', 'UTF-8')
 move.send(message_home2)
+time.sleep(wait+7)
 
-print('\n----Waiting----')
-time.sleep(wait+30)
-
-print('\n----Moving to cell 4 (dummy)----')
-pos = controller.Position_in_cell(4)
+print('\n----Moving to cell 5 (dummy)----')
+pos = controller.Position_in_cell(5)
 pos.run()
-time.sleep(wait)
+time.sleep(wait+5)
 
 ##### Operation setup
 dispense = controller.Dispense(nozzle=1, volume=1000, wait_time=[0,3,11,3,0], motor_values=[-39000,150,-9100,150,39000])
@@ -69,7 +68,7 @@ rinse_init.run()
 
 ##### (3. Drying)
 ## move_down / blast / move_up
-# dry = controller.Dry(wait_time=[7,25,7])
+# dry = controller.Dry(wait_time=[7,20,7])
 # dry.run()
 
 ##### (4. Move back to Cell 1)

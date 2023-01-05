@@ -326,9 +326,10 @@ class Dispense(Motor):
 
 
 class Rinse(Motor):
-    def __init__(self, wait_time=[16,12,3.5,20,12,16]): # [221206] tune 2 [16,12,3,10,12,16]
+    def __init__(self, loop=1, wait_time=[16,12,3.5,20,12,16]): # [221206] tune 2 [16,12,3,10,12,16]
         #global state
         self.wait_time = wait_time
+        self.loop = loop
         Motor.__init__(self)
         self.state = 2
 
@@ -346,18 +347,19 @@ class Rinse(Motor):
         if self.wait_time[0]:
             self.send(move_down) 
             time.sleep(self.wait_time[0])
-        if self.wait_time[1]:
-            self.send(suc)
-            time.sleep(self.wait_time[1])
-        if self.wait_time[2]:
-            self.send(flush)
-            time.sleep(self.wait_time[2])
-        if self.wait_time[3]:
-            self.send(equil_flush)
-            time.sleep(self.wait_time[3])
-        if self.wait_time[4]:
-            self.send(suc)
-            time.sleep(self.wait_time[4])
+        for x in range(loop):
+            if self.wait_time[1]:
+                self.send(suc)
+                time.sleep(self.wait_time[1])
+            if self.wait_time[2]:
+                self.send(flush)
+                time.sleep(self.wait_time[2])
+            if self.wait_time[3]:
+                self.send(equil_flush)
+                time.sleep(self.wait_time[3])
+            if self.wait_time[4]:
+                self.send(suc)
+                time.sleep(self.wait_time[4])
         if self.wait_time[5]:
             self.send(move_up)
             time.sleep(self.wait_time[5]) # [220830] newly added

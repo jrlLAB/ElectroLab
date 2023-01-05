@@ -347,7 +347,7 @@ class Rinse(Motor):
         if self.wait_time[0]:
             self.send(move_down) 
             time.sleep(self.wait_time[0])
-        for x in range(loop):
+        for x in range(self.loop):
             if self.wait_time[1]:
                 self.send(suc)
                 time.sleep(self.wait_time[1])

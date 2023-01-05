@@ -60,8 +60,8 @@ dispense_2.run()
 
 ##### (2. Rinsing)
 ## move_down / suc / flush / equil_flush / suc / move_up
-rinse_init = controller.Rinse(wait_time=[16,12,0,5,0,16])
-rinse_init.run()
+# rinse_init = controller.Rinse(wait_time=[16,12,0,5,0,16])
+# rinse_init.run()
 
 # print('\n----Waiting before additional suction---')
 # time.sleep(12)

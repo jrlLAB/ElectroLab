@@ -19,6 +19,12 @@ head_23 = np.array([-1740, -1140])
 head_13 = np.array([100, -680]) # 120, -600
 nozzle12 = np.array([-280, 400]) # [221103] previsouly [-50, 400], and [-350, 140]
 
+# Nitrogen nozzle global variables:
+nozzle_n2_n = 1 # nitrogen-blowing nozzle number
+nozzle12_n2 = np.array([-200, 0])
+head_23_n2 = np.array([-1740, -1140]) 
+head_13_n2 = np.array([100, -680]) 
+
 class Setup:
     '''
         - Here, test connection
@@ -213,30 +219,6 @@ class Nozzle_change(Motor):
         time.sleep(self.wait_time)
 
 
-def change_dispenser_nozzle(nozzle1, nozzle2, wait_time=1):
-    global nozzle12
-    global nozzle_n
-    print('\nChanging dispensing nozzle from ' + str(nozzle1) + ' to ' + str(nozzle2))
-    if nozzle1 == 1 and nozzle2 == 2:
-        coordinates = nozzle12
-        nozzle_n = 2
-        messageX = '<X, ' + str(move_speed) + ', ' + str(coordinates[0]) + '>'
-        messageY = '<Y, ' + str(move_speed) + ', ' + str(coordinates[1]) + '>'
-        message = bytes(messageX + messageY, 'UTF-8')
-    elif nozzle1 == 2 and nozzle2 ==1:
-        coordinates = -nozzle12
-        nozzle_n = 1
-        messageX = '<X, ' + str(move_speed) + ', ' + str(coordinates[0]) + '>'
-        messageY = '<Y, ' + str(move_speed) + ', ' + str(coordinates[1]) + '>'
-        message = bytes(messageX + messageY, 'UTF-8')
-    elif nozzle1 == nozzle2:
-       print('Dispensing nozzle remained in the same position')
-       coordinates = nozzle12
-       message = bytes('', 'UTF-8')
-    else:
-        raise Exception('Select a correct dispensing nozzle number (1-2)')
-    Motor().send(message)
-
 class Dispense(Motor):
     '''
         User can specify the volume to dispense in uL. The calibrated motor_values
@@ -397,3 +379,112 @@ class Dry(Motor):
             time.sleep(self.wait_time[2])
         print('Drying finished')
         #state = self.state
+
+
+class N2(Motor):
+    def __init__(self, nozzle=1, wait_time=[7,20,7]): # [221206] from [0,0,0]
+        #global state
+        self.nozzle = nozzle
+        self.wait_time = wait_time
+        Motor.__init__(self)
+        self.state = 3
+
+    def run(self):
+        #global state
+        #print(state)
+        change = Nozzle_change(state, self.state)
+        change.run()
+        change_N2_nozzle(self.nozzle, nozzle_n2_n, wait_time=3)
+        #print(state)
+        if self.nozzle == 1:
+            print('N2 bubbling started')
+            if self.wait_time[0]:
+                self.send(b ‘<ZAIRDRY, 100, +30000>’)
+                time.sleep(self.wait_time[0])
+            if self.wait_time[1]:
+                self.send(b’<DC3, 255, 120000>’)
+                time.sleep(self.wait_time[1])
+            if self.wait_time[2]:
+                self.send(b ‘<ZAIRDRY, 100, -30000>’)
+                time.sleep(self.wait_time[2])
+            print('N2 bubbling finished')
+        elif self.nozzle == 2:
+            print('N2 drying started')
+            if self.wait_time[0]:
+                self.send(b ‘<ZAIRDRY, 100, +20000>’)
+                time.sleep(self.wait_time[0])
+            if self.wait_time[1]:
+                self.send(b’<DC6, 255, 120000>’)
+                time.sleep(self.wait_time[1])
+            if self.wait_time[2]:
+                self.send(b ‘<ZAIRDRY, 100, -20000>’)
+                time.sleep(self.wait_time[2])
+            print('N2 drying finished')
+
+        print(state)
+        change = Nozzle_change(state, self.state)
+        change.run()
+        print(state)
+        #print(self.state)
+        print('Drying started')
+        if self.wait_time[0]:
+            self.send(move_down)
+            time.sleep(self.wait_time[0])
+        if self.wait_time[1]:
+            self.send(blast)
+            time.sleep(self.wait_time[1])
+        if self.wait_time[2]:
+            self.send(move_up)
+            time.sleep(self.wait_time[2])
+        print('Drying finished')
+        #state = self.state
+
+
+def change_dispenser_nozzle(nozzle1, nozzle2, wait_time=1):
+    global nozzle12
+    global nozzle_n
+    print('\nChanging dispensing nozzle from ' + str(nozzle1) + ' to ' + str(nozzle2))
+    if nozzle1 == 1 and nozzle2 == 2:
+        coordinates = nozzle12
+        nozzle_n = 2
+        messageX = '<X, ' + str(move_speed) + ', ' + str(coordinates[0]) + '>'
+        messageY = '<Y, ' + str(move_speed) + ', ' + str(coordinates[1]) + '>'
+        message = bytes(messageX + messageY, 'UTF-8')
+    elif nozzle1 == 2 and nozzle2 ==1:
+        coordinates = -nozzle12
+        nozzle_n = 1
+        messageX = '<X, ' + str(move_speed) + ', ' + str(coordinates[0]) + '>'
+        messageY = '<Y, ' + str(move_speed) + ', ' + str(coordinates[1]) + '>'
+        message = bytes(messageX + messageY, 'UTF-8')
+    elif nozzle1 == nozzle2:
+       print('Dispensing nozzle remained in the same position')
+       coordinates = nozzle12
+       message = bytes('', 'UTF-8')
+    else:
+        raise Exception('Select a correct dispensing nozzle number (1-2)')
+    Motor().send(message)
+
+
+def change_N2_nozzle(nozzle1, nozzle2, wait_time=1):
+    global nozzle12_n
+    global nozzle_n2_n
+    print('\nChanging N2 nozzle from ' + str(nozzle1) + ' to ' + str(nozzle2))
+    if nozzle1 == 1 and nozzle2 == 2:
+        coordinates = nozzle12_n
+        nozzle_n2_n = 2
+        messageX = '<X, ' + str(move_speed) + ', ' + str(coordinates[0]) + '>'
+        messageY = '<Y, ' + str(move_speed) + ', ' + str(coordinates[1]) + '>'
+        message = bytes(messageX + messageY, 'UTF-8')
+    elif nozzle1 == 2 and nozzle2 ==1:
+        coordinates = -nozzle12_n
+        nozzle_n2_n = 1
+        messageX = '<X, ' + str(move_speed) + ', ' + str(coordinates[0]) + '>'
+        messageY = '<Y, ' + str(move_speed) + ', ' + str(coordinates[1]) + '>'
+        message = bytes(messageX + messageY, 'UTF-8')
+    elif nozzle1 == nozzle2:
+       print('Dispensing nozzle remained in the same position')
+       coordinates = nozzle12_n
+       message = bytes('', 'UTF-8')
+    else:
+        raise Exception('Select a correct dispensing nozzle number (1-2)')
+    Motor().send(message)

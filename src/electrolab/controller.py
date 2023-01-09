@@ -283,9 +283,9 @@ class Dispense(Motor):
         vol = p[0] + p[1]*volume + p[2]*volume**2 + p[3]*volume**3
         # Calibrated value to dispense 1 mL with a movement of -9100 by default
         slope = self.motor_values[2]/1000
-        self.motor_values[2] = int(volume*slope)
+        self.motor_values[2] = int(vol*slope)
         self.wait_time[0] = 0
-        self.wait_time[2] = abs(slope*volume*11/(9.1*1000))
+        self.wait_time[2] = abs(slope*vol*11/(9.1*1000))
 
     def run(self):
         '''

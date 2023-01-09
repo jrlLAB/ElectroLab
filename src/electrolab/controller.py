@@ -52,6 +52,10 @@ class Setup:
         
 
 class Motor:
+    '''
+        This and the Serial class are the same. This needs to be replaced
+        with Serial throughout the code
+    '''
     def __init__(self):
         pass
 
@@ -64,11 +68,43 @@ class Motor:
         #ser.readline()
         #ser.readline()
         #ser.close()
+
+class Serial:
+    def __init__(self):
+        pass
+
+    def send(self, message):
+        ser = serial.Serial(port_, baudRate)
+        #print(ser.readline())
+        #print('Executing', message)
+        ser.write(message)
+        #ser.readline()
+        #ser.readline()
+        #ser.readline()
+        #ser.close()
         
+
+class MainPower(Serial):
+    '''
+        Sends command to the Relay to turn on or off the main power of the elab
+    '''
+    def __init__(self):
+        pass
+
+    def state(self, state):
+        if state == 'ON':
+            state = 1 
+            print('ElectroLab ON')
+        else:
+            state = 0
+            print('ElectroLab OFF')
+        message = bytes('<Power,' + str(int(state)) + ',0>', 'UTF-8')
+        print(message)
+        self.send(message)
+
 
 class Move(Motor):
     '''
-        This class may be redundant when used in Move_head
     '''
     def __init__(self, pos1, pos2):
         Motor.__init__(self)
@@ -82,7 +118,7 @@ class Move(Motor):
         messageY = '<Y, ' + str(move_speed) + ', ' + str(route[1]) + '>'
         message = bytes(messageX + messageY, 'UTF-8')
         self.send(message)
-        
+
 
 class Move_head(Move):
     '''
@@ -399,25 +435,25 @@ class N2(Motor):
         if self.nozzle == 1:
             print('N2 bubbling started')
             if self.wait_time[0]:
-                self.send(b ‘<ZAIRDRY, 100, +30000>’)
+                self.send(b'<ZAIRDRY, 100, +30000>')
                 time.sleep(self.wait_time[0])
             if self.wait_time[1]:
-                self.send(b’<DC3, 255, 120000>’)
+                self.send(b'<DC3, 255, 120000>')
                 time.sleep(self.wait_time[1])
             if self.wait_time[2]:
-                self.send(b ‘<ZAIRDRY, 100, -30000>’)
+                self.send(b'<ZAIRDRY, 100, -30000>')
                 time.sleep(self.wait_time[2])
             print('N2 bubbling finished')
         elif self.nozzle == 2:
             print('N2 drying started')
             if self.wait_time[0]:
-                self.send(b ‘<ZAIRDRY, 100, +20000>’)
+                self.send(b'<ZAIRDRY, 100, +20000>')
                 time.sleep(self.wait_time[0])
             if self.wait_time[1]:
-                self.send(b’<DC6, 255, 120000>’)
+                self.send(b'<DC6, 255, 120000>')
                 time.sleep(self.wait_time[1])
             if self.wait_time[2]:
-                self.send(b ‘<ZAIRDRY, 100, -20000>’)
+                self.send(b'<ZAIRDRY, 100, -20000>')
                 time.sleep(self.wait_time[2])
             print('N2 drying finished')
 

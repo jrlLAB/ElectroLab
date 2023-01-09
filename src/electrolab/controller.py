@@ -264,7 +264,7 @@ class Dispense(Motor):
         Pending: update wait_time according to volume
     '''
     def __init__(self, nozzle=1, volume=1000, wait_time=[47,3,0,0,0], speed=1000, 
-                 motor_values=[-39000,80,-8530,80,39000]):
+                 motor_values=[-39000,80,-8530,80,39000], p=[0,0,0,0]):
         #global state # This is the general state
         global nozzle_n
         self.nozzle = nozzle
@@ -273,13 +273,19 @@ class Dispense(Motor):
         self.motor_values = motor_values
         Motor.__init__(self)
 
+        self.vol_correction(volume, p) # Corrected volume
+        self.state = 1 # This is the internal state
+
+    def vol_correction(self, volume, p=[0,0,0,0]):
+        '''
+            We assume the fitting is a cubic polynomial
+        '''
+        vol = p[0] + p[1]*volume + p[2]*volume**2 + p[3]*volume**3
         # Calibrated value to dispense 1 mL with a movement of -9100 by default
         slope = self.motor_values[2]/1000
         self.motor_values[2] = int(volume*slope)
         self.wait_time[0] = 0
         self.wait_time[2] = abs(slope*volume*11/(9.1*1000))
-            
-        self.state = 1 # This is the internal state
 
     def run(self):
         '''

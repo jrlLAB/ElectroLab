@@ -264,7 +264,9 @@ class Dispense(Motor):
         Pending: update wait_time according to volume
     '''
     def __init__(self, nozzle=1, volume=1000, wait_time=[47,3,0,0,0], speed=1000, 
-                 motor_values=[-39000,80,-8530,80,39000], p=[0,0,0,0]):
+                 motor_values=[-39000,80,-8530,80,39000], 
+                 p=[19.801938114061617,0.964367848880719,1.167139063529185e-05,
+                 -2.873709837738213e-09]):
         #global state # This is the general state
         global nozzle_n
         self.nozzle = nozzle

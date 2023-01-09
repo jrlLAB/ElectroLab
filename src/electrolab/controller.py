@@ -98,7 +98,7 @@ class MainPower(Serial):
         else:
             state = 0
             print('ElectroLab OFF')
-        message = bytes('<Power,' + str(int(state)) + ',0>', 'UTF-8')
+        message = bytes('<POWER,' + str(int(state)) + ',0>', 'UTF-8')
         #print(message)
         self.send(message)
 

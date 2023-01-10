@@ -61,8 +61,9 @@ class Motor:
 
     def send(self, message):
         #ser = serial.Serial(port_, baudRate)
-        print(ser.readline())
+        #print(ser.readline())
         #print('Executing', message)
+        time.sleep(1)
         ser.write(message)
         #ser.readline()
         #ser.readline()
@@ -74,9 +75,11 @@ class Serial:
         pass
 
     def send(self, message):
-        ser = serial.Serial(port_, baudRate)
+        #global ser
+        #ser = serial.Serial(port_, baudRate)
         #print(ser.readline())
-        #print('Executing', message)
+        #print('Executing', message)\
+        time.sleep(1)
         ser.write(message)
         #ser.readline()
         #ser.readline()
@@ -93,10 +96,10 @@ class MainPower(Serial):
 
     def state(self, state):
         if state == 'ON':
-            state = 1 
+            state = 0 
             print('ElectroLab ON')
         else:
-            state = 0
+            state = 1
             print('ElectroLab OFF')
         message = bytes('<POWER,' + str(int(state)) + ',0>', 'UTF-8')
         #print(message)

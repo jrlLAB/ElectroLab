@@ -355,7 +355,7 @@ class Dispense(Motor):
 
 
 class Rinse(Motor):
-    def __init__(self, loop=1, wait_time=[16,12,3.5,20,12,16]): # [221206] tune 2 [16,12,3,10,12,16]
+    def __init__(self, loop=1, wait_time=[16,12,3.5,12,12,16]): # [221206] tune 2 [16,12,3,10,12,16]
         #global state
         self.wait_time = wait_time
         self.loop = loop
@@ -367,7 +367,7 @@ class Rinse(Motor):
         move_down = b'<ZFLUSH, 100, +69200>'
         move_up = b'<ZFLUSH, 100, -69200>'
         flush = b'<DC4, 80, 5000>' # [221206] tune 80
-        equil_flush = b'<DC5, 255, 4000>'
+        equil_flush = b'<DC5, 255, 6000>'
         suc = b'<DC2, 210, 20000>'
 
         change = Nozzle_change(state, self.state)

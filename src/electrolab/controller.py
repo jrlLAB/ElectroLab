@@ -429,10 +429,11 @@ class Dry(Motor):
 
 
 class N2(Motor):
-    def __init__(self, nozzle=1, wait_time=[7,20,7]): # [221206] from [0,0,0]
+    def __init__(self, nozzle=1, loop=1, wait_time=[7,20,7]): # [221206] from [0,0,0]
         #global state
         self.nozzle = nozzle
         self.wait_time = wait_time
+        self.loop = loop
         Motor.__init__(self)
         self.state = 3
 
@@ -443,30 +444,31 @@ class N2(Motor):
         change.run()
         change_N2_nozzle(self.nozzle, nozzle_n2_n, wait_time=3)
         #print(state)
-        if self.nozzle == 1:
-            print('N2 bubbling started')
-            if self.wait_time[0]:
-                self.send(b'<ZAIRDRY, 100, +10000>')
-                time.sleep(self.wait_time[0])
-            if self.wait_time[1]:
-                self.send(b'<DC3, 255, 1000>')
-                time.sleep(self.wait_time[1])
-            if self.wait_time[2]:
-                self.send(b'<ZAIRDRY, 100, -10000>')
-                time.sleep(self.wait_time[2])
-            print('N2 bubbling finished')
-        elif self.nozzle == 2:
-            print('N2 drying started')
-            if self.wait_time[0]:
-                self.send(b'<ZAIRDRY, 100, +10000>')
-                time.sleep(self.wait_time[0])
-            if self.wait_time[1]:
-                self.send(b'<DC6, 255, 6000>')
-                time.sleep(self.wait_time[1])
-            if self.wait_time[2]:
-                self.send(b'<ZAIRDRY, 100, -10000>')
-                time.sleep(self.wait_time[2])
-            print('N2 drying finished')
+        for x in range(self.loop):
+            if self.nozzle == 1:
+                print('N2 bubbling started')
+                if self.wait_time[0]:
+                    self.send(b'<ZAIRDRY, 100, +30000>')
+                    time.sleep(self.wait_time[0])
+                if self.wait_time[1]:
+                    self.send(b'<DC3, 255, 1000>')
+                    time.sleep(self.wait_time[1])
+                if self.wait_time[2]:
+                    self.send(b'<ZAIRDRY, 100, -30000>')
+                    time.sleep(self.wait_time[2])
+                print('N2 bubbling finished')
+            elif self.nozzle == 2:
+                print('N2 drying started')
+                if self.wait_time[0]:
+                    self.send(b'<ZAIRDRY, 100, +20000>')
+                    time.sleep(self.wait_time[0])
+                if self.wait_time[1]:
+                    self.send(b'<DC6, 255, 6000>')
+                    time.sleep(self.wait_time[1])
+                if self.wait_time[2]:
+                    self.send(b'<ZAIRDRY, 100, -20000>')
+                    time.sleep(self.wait_time[2])
+                print('N2 drying finished')
 
         print(state)
         change = Nozzle_change(state, self.state)
@@ -513,24 +515,24 @@ def change_dispenser_nozzle(nozzle1, nozzle2, wait_time=1):
 
 
 def change_N2_nozzle(nozzle1, nozzle2, wait_time=1):
-    global nozzle12_n
+    global nozzle12_n2
     global nozzle_n2_n
     print('\nChanging N2 nozzle from ' + str(nozzle1) + ' to ' + str(nozzle2))
     if nozzle1 == 1 and nozzle2 == 2:
-        coordinates = nozzle12_n
+        coordinates = nozzle12_n2
         nozzle_n2_n = 2
         messageX = '<X, ' + str(move_speed) + ', ' + str(coordinates[0]) + '>'
         messageY = '<Y, ' + str(move_speed) + ', ' + str(coordinates[1]) + '>'
         message = bytes(messageX + messageY, 'UTF-8')
     elif nozzle1 == 2 and nozzle2 ==1:
-        coordinates = -nozzle12_n
+        coordinates = -nozzle12_n2
         nozzle_n2_n = 1
         messageX = '<X, ' + str(move_speed) + ', ' + str(coordinates[0]) + '>'
         messageY = '<Y, ' + str(move_speed) + ', ' + str(coordinates[1]) + '>'
         message = bytes(messageX + messageY, 'UTF-8')
     elif nozzle1 == nozzle2:
        print('Dispensing nozzle remained in the same position')
-       coordinates = nozzle12_n
+       coordinates = nozzle12_n2
        message = bytes('', 'UTF-8')
     else:
         raise Exception('Select a correct dispensing nozzle number (1-2)')

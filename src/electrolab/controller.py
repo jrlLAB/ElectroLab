@@ -446,25 +446,25 @@ class N2(Motor):
         if self.nozzle == 1:
             print('N2 bubbling started')
             if self.wait_time[0]:
-                self.send(b'<ZAIRDRY, 100, +30000>')
+                self.send(b'<ZAIRDRY, 100, +10000>')
                 time.sleep(self.wait_time[0])
             if self.wait_time[1]:
-                self.send(b'<DC3, 255, 120000>')
+                self.send(b'<DC3, 255, 1000>')
                 time.sleep(self.wait_time[1])
             if self.wait_time[2]:
-                self.send(b'<ZAIRDRY, 100, -30000>')
+                self.send(b'<ZAIRDRY, 100, -10000>')
                 time.sleep(self.wait_time[2])
             print('N2 bubbling finished')
         elif self.nozzle == 2:
             print('N2 drying started')
             if self.wait_time[0]:
-                self.send(b'<ZAIRDRY, 100, +20000>')
+                self.send(b'<ZAIRDRY, 100, +10000>')
                 time.sleep(self.wait_time[0])
             if self.wait_time[1]:
-                self.send(b'<DC6, 255, 120000>')
+                self.send(b'<DC6, 255, 6000>')
                 time.sleep(self.wait_time[1])
             if self.wait_time[2]:
-                self.send(b'<ZAIRDRY, 100, -20000>')
+                self.send(b'<ZAIRDRY, 100, -10000>')
                 time.sleep(self.wait_time[2])
             print('N2 drying finished')
 

@@ -429,7 +429,7 @@ class Dry(Motor):
 
 
 class N2(Motor):
-    def __init__(self, nozzle=1, loop=1, wait_time=[7,20,7]): # [221206] from [0,0,0]
+    def __init__(self, nozzle=1, loop=1, wait_time=[7,20,7], mode='single'): # [221206] from [0,0,0]
         #global state
         self.nozzle = nozzle
         self.wait_time = wait_time
@@ -444,31 +444,39 @@ class N2(Motor):
         change.run()
         change_N2_nozzle(self.nozzle, nozzle_n2_n, wait_time=3)
         #print(state)
-        for x in range(self.loop):
-            if self.nozzle == 1:
-                print('N2 bubbling started')
-                if self.wait_time[0]:
-                    self.send(b'<ZAIRDRY, 100, +30000>')
-                    time.sleep(self.wait_time[0])
-                if self.wait_time[1]:
-                    self.send(b'<DC3, 255, 1000>')
+        if self.nozzle == 1:
+            print('N2 bubbling started')
+            if self.wait_time[0]:
+                self.send(b'<ZAIRDRY, 100, +30000>')
+                time.sleep(self.wait_time[0])
+            if self.wait_time[1]:
+                if mode == 'dual':
+                    for x in range(self.loop):
+                        self.send(b'<DC3, 255, 1000>')
+                        self.send(b'<DC6, 255, 1000>')
                     time.sleep(self.wait_time[1])
-                if self.wait_time[2]:
-                    self.send(b'<ZAIRDRY, 100, -30000>')
-                    time.sleep(self.wait_time[2])
-                print('N2 bubbling finished')
-            elif self.nozzle == 2:
-                print('N2 drying started')
-                if self.wait_time[0]:
-                    self.send(b'<ZAIRDRY, 100, +20000>')
-                    time.sleep(self.wait_time[0])
-                if self.wait_time[1]:
+                else: # By default, mode = 'single'
+                    for x in range(self.loop):
+                        self.send(b'<DC3, 255, 1000>')
+                    time.sleep(self.wait_time[1])
+
+            if self.wait_time[2]:
+                self.send(b'<ZAIRDRY, 100, -30000>')
+                time.sleep(self.wait_time[2])
+            print('N2 bubbling finished')
+        elif self.nozzle == 2:
+            print('N2 drying started')
+            if self.wait_time[0]:
+                self.send(b'<ZAIRDRY, 100, +20000>')
+                time.sleep(self.wait_time[0])
+            if self.wait_time[1]:
+                for x in range(self.loop):
                     self.send(b'<DC6, 255, 6000>')
-                    time.sleep(self.wait_time[1])
-                if self.wait_time[2]:
-                    self.send(b'<ZAIRDRY, 100, -20000>')
-                    time.sleep(self.wait_time[2])
-                print('N2 drying finished')
+                time.sleep(self.wait_time[1])
+            if self.wait_time[2]:
+                self.send(b'<ZAIRDRY, 100, -20000>')
+                time.sleep(self.wait_time[2])
+            print('N2 drying finished')
 
         print(state)
         change = Nozzle_change(state, self.state)
@@ -477,13 +485,13 @@ class N2(Motor):
         #print(self.state)
         print('Drying started')
         if self.wait_time[0]:
-            self.send(move_down)
+            self.send(b'<ZAIRDRY, 100, +30000>')
             time.sleep(self.wait_time[0])
         if self.wait_time[1]:
-            self.send(blast)
+            self.send(b'<DC3, 255, 3000>')
             time.sleep(self.wait_time[1])
         if self.wait_time[2]:
-            self.send(move_up)
+            self.send(b'<ZAIRDRY, 100, -30000>')
             time.sleep(self.wait_time[2])
         print('Drying finished')
         #state = self.state

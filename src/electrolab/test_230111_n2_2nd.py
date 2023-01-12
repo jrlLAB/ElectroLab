@@ -21,25 +21,22 @@ time.sleep(wait+5)
 print('\n----NOZZLES HOMING----')
 message_home2 = bytes('<homeDisp,0,0>', 'UTF-8')
 move.send(message_home2)
-time.sleep(wait+10)
+time.sleep(wait+14)
 
 print('\n----Moving to cell 2----') # to 5
 pos = controller.Position_in_cell(2)
 pos.run()
 time.sleep(wait+5)
 
-# print('\n----Disp. 1 init_a----')
-# dispense_fill_1 = controller.Dispense(nozzle=1, volume=4500, wait_time=[47,3,0,3,0], motor_values=[-39000,80,-8530,80,39000], p = [0,1,0,0])
-# dispense_fill_1.run()
-
-# print('\n----Dispense in cell 5 from Nozzle 1 & 2----')
-# dispense_1d = controller.Dispense(nozzle=1, volume=500, wait_time=[0,3,12,3,0], motor_values=[-39000,80,-8530,80,39000])
-# dispense_1d.run()
-# time.sleep(wait-3)
-
 ##### (1. N2 bubbling)
-print('\n----N2 bubbling----')
-n2_bubbling = controller.N2(loop = 2, nozzle = 1, wait_time = [7,5,7])
+print('\n----\033[31mN2 dryng\033[0m----')
+n2_drying = controller.N2(loop = 5, nozzle = 2, wait_time = [7,6,7], mode = 'single')
+n2_drying.run()
+
+time.sleep(wait+5)
+
+print('\n----\033[31mN2 bubbling\033[0m----')
+n2_bubbling = controller.N2(loop = 5, nozzle = 1, wait_time = [7,5,7], mode = 'dual')
 n2_bubbling.run()
 
 ##### (2. Rinsing)

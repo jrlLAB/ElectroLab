@@ -429,11 +429,12 @@ class Dry(Motor):
 
 
 class N2(Motor):
-    def __init__(self, nozzle=1, loop=1, wait_time=[7,20,7], mode='single'): # [221206] from [0,0,0]
+    def __init__(self, nozzle=1, loop=1, wait_time=[7,6,7], mode='single'): # [221206] from [0,0,0]
         #global state
         self.nozzle = nozzle
         self.wait_time = wait_time
         self.loop = loop
+        self.mode = mode
         Motor.__init__(self)
         self.state = 3
 
@@ -450,20 +451,22 @@ class N2(Motor):
                 self.send(b'<ZAIRDRY, 100, +30000>')
                 time.sleep(self.wait_time[0])
             if self.wait_time[1]:
-                if mode == 'dual':
+                if self.mode == 'dual':
                     for x in range(self.loop):
+                        self.send(b'<DC6, 255, 2000>')
                         self.send(b'<DC3, 255, 1000>')
-                        self.send(b'<DC6, 255, 1000>')
+                        time.sleep(2)
                     time.sleep(self.wait_time[1])
                 else: # By default, mode = 'single'
                     for x in range(self.loop):
                         self.send(b'<DC3, 255, 1000>')
+                        time.sleep(1.2)
                     time.sleep(self.wait_time[1])
-
             if self.wait_time[2]:
                 self.send(b'<ZAIRDRY, 100, -30000>')
                 time.sleep(self.wait_time[2])
             print('N2 bubbling finished')
+
         elif self.nozzle == 2:
             print('N2 drying started')
             if self.wait_time[0]:
@@ -472,6 +475,7 @@ class N2(Motor):
             if self.wait_time[1]:
                 for x in range(self.loop):
                     self.send(b'<DC6, 255, 6000>')
+                    time.sleep(6)
                 time.sleep(self.wait_time[1])
             if self.wait_time[2]:
                 self.send(b'<ZAIRDRY, 100, -20000>')
@@ -483,17 +487,17 @@ class N2(Motor):
         change.run()
         print(state)
         #print(self.state)
-        print('Drying started')
-        if self.wait_time[0]:
-            self.send(b'<ZAIRDRY, 100, +30000>')
-            time.sleep(self.wait_time[0])
-        if self.wait_time[1]:
-            self.send(b'<DC3, 255, 3000>')
-            time.sleep(self.wait_time[1])
-        if self.wait_time[2]:
-            self.send(b'<ZAIRDRY, 100, -30000>')
-            time.sleep(self.wait_time[2])
-        print('Drying finished')
+        # print('Drying started')
+        # if self.wait_time[0]:
+        #     self.send(b'<ZAIRDRY, 100, +30000>')
+        #     time.sleep(self.wait_time[0])
+        # if self.wait_time[1]:
+        #     self.send(b'<DC3, 255, 3000>')
+        #     time.sleep(self.wait_time[1])
+        # if self.wait_time[2]:
+        #     self.send(b'<ZAIRDRY, 100, -30000>')
+        #     time.sleep(self.wait_time[2])
+        # print('Drying finished')
         #state = self.state
 
 

@@ -21,7 +21,7 @@ nozzle12 = np.array([-280, 400]) # [221103] previsouly [-50, 400], and [-350, 14
 
 # Nitrogen nozzle global variables:
 nozzle_n2_n = 1 # nitrogen-blowing nozzle number
-nozzle12_n2 = np.array([-200, 0])
+nozzle12_n2 = np.array([500, 0])
 head_23_n2 = np.array([-1740, -1140]) 
 head_13_n2 = np.array([100, -680]) 
 
@@ -429,7 +429,7 @@ class Dry(Motor):
 
 
 class N2(Motor):
-    def __init__(self, nozzle=1, loop=1, wait_time=[7,6,7], mode='single'): # [221206] from [0,0,0]
+    def __init__(self, nozzle=1, loop=1, wait_time=[7,3,7], mode='single'): # [221206] from [0,0,0]
         #global state
         self.nozzle = nozzle
         self.wait_time = wait_time
@@ -453,9 +453,10 @@ class N2(Motor):
             if self.wait_time[1]:
                 if self.mode == 'dual':
                     for x in range(self.loop):
-                        self.send(b'<DC6, 255, 2000>')
-                        self.send(b'<DC3, 255, 1000>')
-                        time.sleep(2)
+                        self.send(b'<DC6, 255, 16000>')
+                        time.sleep(5)
+                        self.send(b'<DC3, 255, 8000>')
+                        time.sleep(11)
                     time.sleep(self.wait_time[1])
                 else: # By default, mode = 'single'
                     for x in range(self.loop):

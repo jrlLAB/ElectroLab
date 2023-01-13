@@ -28,15 +28,16 @@ pos = controller.Position_in_cell(2)
 pos.run()
 time.sleep(wait+5)
 
-##### (1. N2 bubbling)
-print('\n----\033[31mN2 dryng\033[0m----')
-n2_drying = controller.N2(loop = 5, nozzle = 2, wait_time = [7,6,7], mode = 'single')
+##### (N2 drying - nozzle 2)
+print('\n----\033[31mN2 drying\033[0m----')
+n2_drying = controller.N2(loop = 5, nozzle = 2, wait_time = [7,3,7], mode = 'single')
 n2_drying.run()
 
 time.sleep(wait+5)
 
+##### (N2 bubbling - nozzle 1)
 print('\n----\033[31mN2 bubbling\033[0m----')
-n2_bubbling = controller.N2(loop = 5, nozzle = 1, wait_time = [7,5,7], mode = 'dual')
+n2_bubbling = controller.N2(loop = 2, nozzle = 1, wait_time = [7,3,7], mode = 'dual')
 n2_bubbling.run()
 
 ##### (2. Rinsing)

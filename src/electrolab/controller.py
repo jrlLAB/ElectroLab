@@ -21,7 +21,7 @@ nozzle12 = np.array([-280, 400]) # [221103] previsouly [-50, 400], and [-350, 14
 
 # Nitrogen nozzle global variables:
 nozzle_n2_n = 1 # nitrogen-blowing nozzle number
-nozzle12_n2 = np.array([500, 0])
+nozzle12_n2 = np.array([-500, 0])
 head_23_n2 = np.array([-1740, -1140]) 
 head_13_n2 = np.array([100, -680]) 
 

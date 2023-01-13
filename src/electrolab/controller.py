@@ -443,7 +443,7 @@ class N2(Motor):
         #print(state)
         change = Nozzle_change(state, self.state)
         change.run()
-        change_N2_nozzle(self.nozzle, nozzle_n2_n, wait_time=3)
+        change_N2_nozzle(nozzle_n2_n, self.nozzle, wait_time=3)
         #print(state)
         if self.nozzle == 1:
             print('N2 bubbling started')

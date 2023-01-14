@@ -14,14 +14,14 @@ dx0 = 4350 # dx for the home position
 dy0 = 2800 # [220830] newly added
 dx = 2000
 dy = 4000
-head_12 = np.array([1920, 400])
-head_23 = np.array([-1740, -1140])
-head_13 = np.array([100, -680]) # 120, -600
-nozzle12 = np.array([-280, 400]) # [221103] previsouly [-50, 400], and [-350, 140]
+head_12 = np.array([1920, 400]) # [230113]
+head_23 = np.array([-1540, -1140]) # [230113] [-1740, -1140]
+head_13 = np.array([-600, -680]) # [230113] [100, -680]
+nozzle12 = np.array([-280, 400]) # [230113]
 
 # Nitrogen nozzle global variables:
 nozzle_n2_n = 1 # nitrogen-blowing nozzle number
-nozzle12_n2 = np.array([-500, 0])
+nozzle12_n2 = np.array([-870, 0])
 head_23_n2 = np.array([-1740, -1140]) 
 head_13_n2 = np.array([100, -680]) 
 
@@ -96,10 +96,10 @@ class MainPower(Serial):
 
     def state(self, state):
         if state == 'ON':
-            state = 0 
+            state = 1 
             print('ElectroLab ON')
         else:
-            state = 1
+            state = 0
             print('ElectroLab OFF')
         message = bytes('<POWER,' + str(int(state)) + ',0>', 'UTF-8')
         #print(message)
@@ -429,7 +429,7 @@ class Dry(Motor):
 
 
 class N2(Motor):
-    def __init__(self, nozzle=1, loop=1, wait_time=[7,3,7], mode='single'): # [221206] from [0,0,0]
+    def __init__(self, nozzle=1, loop=1, wait_time=[12,3,12], mode='single'): # [221206] from [0,0,0]
         #global state
         self.nozzle = nozzle
         self.wait_time = wait_time
@@ -448,7 +448,7 @@ class N2(Motor):
         if self.nozzle == 1:
             print('N2 bubbling started')
             if self.wait_time[0]:
-                self.send(b'<ZAIRDRY, 100, +30000>')
+                self.send(b'<ZAIRDRY, 100, +57000>') # med stream: 57000
                 time.sleep(self.wait_time[0])
             if self.wait_time[1]:
                 if self.mode == 'dual':
@@ -464,22 +464,22 @@ class N2(Motor):
                         time.sleep(1.2)
                     time.sleep(self.wait_time[1])
             if self.wait_time[2]:
-                self.send(b'<ZAIRDRY, 100, -30000>')
+                self.send(b'<ZAIRDRY, 100, -57000>')
                 time.sleep(self.wait_time[2])
             print('N2 bubbling finished')
 
         elif self.nozzle == 2:
             print('N2 drying started')
             if self.wait_time[0]:
-                self.send(b'<ZAIRDRY, 100, +20000>')
+                self.send(b'<ZAIRDRY, 100, +55000>')
                 time.sleep(self.wait_time[0])
             if self.wait_time[1]:
                 for x in range(self.loop):
                     self.send(b'<DC6, 255, 6000>')
-                    time.sleep(6)
+                    time.sleep(10) # 6 or 10 (strong, or med)
                 time.sleep(self.wait_time[1])
             if self.wait_time[2]:
-                self.send(b'<ZAIRDRY, 100, -20000>')
+                self.send(b'<ZAIRDRY, 100, -55000>')
                 time.sleep(self.wait_time[2])
             print('N2 drying finished')
 

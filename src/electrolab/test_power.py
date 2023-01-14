@@ -19,4 +19,7 @@ time.sleep(2)
 power.state('ON')
 time.sleep(2)
 
+power.state('OFF')
+time.sleep(2)
+
 # setup.disconnect()

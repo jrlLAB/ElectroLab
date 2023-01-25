@@ -10,14 +10,24 @@ setup = controller.Setup(port, baud_rate)
 setup.connect()
 
 wait = 10
-
 move = controller.Motor()
+power = controller.MainPower()
+
+# Main Power ON
+print('\n----MAIN POWER ON----')
+power.state('ON')
+time.sleep(2)
 
 # Homming
-print('\n----HOMMING----')
-message_home = bytes('<homeGantry,0,0>', 'UTF-8')
-move.send(message_home)
-time.sleep(wait)
+print('\n----GANTRY HOMING----')
+message_home1 = bytes('<homeGantry,0,0>', 'UTF-8')
+move.send(message_home1)
+time.sleep(wait+5)
+
+print('\n----NOZZLES HOMING----')
+message_home2 = bytes('<homeDisp,0,0>', 'UTF-8')
+move.send(message_home2)
+time.sleep(wait+10)
 
 print('\n----Moving to cell 4 (dummy)----')
 pos = controller.Position_in_cell(4)
@@ -33,7 +43,12 @@ dispense_2 = controller.Dispense(nozzle=2, volume=700, wait_time=[0,3,12,3,0], m
 dispense_2.run()
 time.sleep(10)
 
+# Main Power OFF
+print('\n----MAIN POWER OFF----')
+power.state('OFF')
+time.sleep(2)
 
+# <POWER,1,0>
 # <PUMP1,1000,45000>
 # <PUMP2,1000,45000>
 

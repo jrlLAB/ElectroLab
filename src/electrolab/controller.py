@@ -10,7 +10,7 @@ state = 2 # Nozzle state (1: dispensing, 2: rinsing, 3: drying)
 nozzle_n = 1 # dispenser nozzle number
 position = 0 # Head position, 0: home, 1: cell 1, 2: cell2, etc
 move_speed = 1000 # Movement speed
-dx0 = 4350 # dx for the home position
+dx0 = 4450 # dx for the home position, [230116] 4350
 dy0 = 2800 # [220830] newly added
 dx = 2000
 dy = 4000
@@ -364,9 +364,9 @@ class Rinse(Motor):
 
     def run(self):
         #global state
-        move_down = b'<ZFLUSH, 100, +69200>'
-        move_up = b'<ZFLUSH, 100, -69200>'
-        flush = b'<DC4, 80, 5000>' # [221206] tune 80
+        move_down = b'<ZFLUSH, 100, +69300>' # [230116] +69200
+        move_up = b'<ZFLUSH, 100, -69300>'
+        flush = b'<DC4, 65, 2700>' # [221206] tune 80, [230116] 80, 5000 (medium), 65, 2700 (small)
         equil_flush = b'<DC5, 255, 6000>'
         suc = b'<DC2, 210, 20000>'
 

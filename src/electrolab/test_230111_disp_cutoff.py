@@ -9,12 +9,17 @@ setup = controller.Setup(port, baud_rate)
 setup.connect()
 
 wait = 10
-
 move = controller.Motor()
+power = controller.MainPower()
 
 p1_default = [19.801938114061617,0.964367848880719,1.167139063529185e-05,-2.873709837738213e-09]
 p2_default = [19.751968491759097,0.952312160718057,3.235820687217786e-05,-1.557420164573522e-08]
 p_linear = [0,1,0,0]
+
+# Main Power ON
+print('\n----MAIN POWER ON----')
+power.state('ON')
+time.sleep(2)
 
 # Homming
 print('\n----GANTRY HOMING----')
@@ -85,8 +90,14 @@ for x in vol_list:
         dispense_2d.run()
     time.sleep(10)
 
-# <PUMP1,1000,45000>
-# <PUMP2,1000,45000>
+# Main Power OFF
+print('\n----MAIN POWER OFF----')
+power.state('OFF')
+time.sleep(2)
 
 print('Finished')
 setup.disconnect()
+
+### <POWER,1,0>
+### <PUMP1,1000,45000>
+### <PUMP2,1000,45000>

@@ -7,17 +7,24 @@ import matplotlib.pyplot as plt
 import softpotato as sp
 from scipy.optimize import curve_fit
 
-# General setup
-# port = '/dev/ttyACM0' # Linux
-port = 'COM3' # Windows
+port = 'COM3'
 baud_rate = 115200
 
 setup = controller.Setup(port, baud_rate)
 setup.connect()
 
-wait = 10
-
 move = controller.Motor()
+power = controller.MainPower()
+
+wait = 10
+p1_default = [19.801938114061617,0.964367848880719,1.167139063529185e-05,-2.873709837738213e-09]
+p2_default = [19.751968491759097,0.952312160718057,3.235820687217786e-05,-1.557420164573522e-08]
+p_linear = [0,1,0,0]
+
+# Main Power ON
+print('\n----MAIN POWER ON----')
+power.state('ON')
+time.sleep(2)
 
 # Homming
 print('\n----GANTRY HOMING----')
@@ -28,48 +35,67 @@ time.sleep(wait+5)
 print('\n----NOZZLES HOMING----')
 message_home2 = bytes('<homeDisp,0,0>', 'UTF-8')
 move.send(message_home2)
-time.sleep(wait+7)
+time.sleep(wait+15)
 
-print('\n----Moving to cell 5 (dummy)----')
-pos = controller.Position_in_cell(5)
+# Move to the dummy cell
+print('\n----Moving to cell 4 (dummy)----')
+pos = controller.Position_in_cell(4)
 pos.run()
 time.sleep(wait+5)
 
-print('\n----Dispense in cell 5 from Nozzle 1 & 2----')
-dispense_1d = controller.Dispense(nozzle=1, volume=300, wait_time=[0,3,12,3,0], motor_values=[-39000,80,-8530,80,39000])
+
+
+print('\n----Dispense in cell 4 from Nozzle 1 & 2----')
+
+dispense_1d = controller.Dispense(nozzle=1, volume=600, wait_time=[0,3,12,3,0], motor_values=[-39000,80,-8530,80,39000], p = p_linear)
 dispense_1d.run()
 time.sleep(wait-3)
 
-dispense_2d = controller.Dispense(nozzle=2, volume=600, wait_time=[0,3,12,3,0], motor_values=[-39000,80,-9300,80,39000])
+dispense_2d = controller.Dispense(nozzle=2, volume=600, wait_time=[0,3,12,3,0], motor_values=[-39000,80,-9300,80,39000], p = p_linear)
 dispense_2d.run()
 time.sleep(wait-3)
 
-print('\n----Moving to cell 1----')
-pos = controller.Position_in_cell(1)
+
+
+# Move to the cell
+print('\n----Moving to cell 2----')
+pos = controller.Position_in_cell(2)
 pos.run()
-time.sleep(wait)
+time.sleep(wait+5)
 
 ### Nozzle 1 contains redoxmer !!
+# p1_default, p2_default, p_linear
 
 ### (0) CHANGE VOLUMES !!!!
-print('\n----Dispense in cell 1 from Nozzle 1 & 2----')
-dispense_1 = controller.Dispense(nozzle=1, volume=1500, wait_time=[0,3,12,3,0], motor_values=[-39000,80,-8530,80,39000])
-dispense_1.run()
-time.sleep(wait-3)
+print('\n----Dispense in cell 2 from Nozzle 1 & 2----')
 
-dispense_2 = controller.Dispense(nozzle=2, volume=1500, wait_time=[0,3,12,3,0], motor_values=[-39000,80,-9300,80,39000])
-# dispense_2.run()
-time.sleep(wait-3)
+# REDOX SPECIES + ELECTROLYTES
+dispense_1 = controller.Dispense(nozzle=1, volume=1000, wait_time=[0,3,12,3,0], motor_values=[-39000,80,-8530,80,39000], p = p_linear)
+dispense_1.run()
+time.sleep(wait)
+
+# ELECTROLYTES
+dispense_2 = controller.Dispense(nozzle=2, volume=500, wait_time=[0,3,12,3,0], motor_values=[-39000,80,-9300,80,39000], p = p_linear)
+dispense_2.run()
+time.sleep(wait)
+
+##### (1) N2 bubbling - nozzle 1 (10 loops for 3 minutes)
+print('\n----\033[31mN2 bubbling\033[0m----')
+n2_bubbling = controller.N2(loop = 3, nozzle = 1, wait_time = [12,3,12], mode = 'dual')
+n2_bubbling.run()
+
+# Main Power OFF (run or skip)
+print('\n----MAIN POWER OFF----')
+power.state('OFF')
+time.sleep(5)
+
 
 time.sleep(60)
 
 
 
 
-
-
-
-
+##### E-CHEM PART
 
 ##### Setup
 # Select the potentiostat model to use:
@@ -81,7 +107,7 @@ model = 'chi1205b'
 # Path to the chi software, including extension .exe. Negletected by emstatpico
 path = 'C:/Users/Inkyu/Documents/221022_chi/chi1205b_mini2_LatestUpdate_2022/chi1205b.exe'
 # Folder where to save the data, it needs to be created previously
-folder = 'C:/Users/Inkyu/Documents/221210_elab_b_100'                    ### (1) CHANGE THIS !!!!
+folder = 'C:/Users/Inkyu/Documents/230116_elab_e_100'                    ### (1) CHANGE THIS !!!!
 # Initialization:
 pp.potentiostat.Setup(model, path, folder)
 
@@ -97,9 +123,9 @@ sens = 1e-5     # A/V, current sensitivity                              ### (2) 
 header = 'CV'   # header for data file
 
 
-
 ##### Experiment:
-sr = np.array([0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18, 0.2])          # V/s, scan rate
+sr = np.array([0.02, 0.05, 0.1, 0.2, 0.5])          # V/s, scan rate
+# [0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18, 0.2]
 nsr = sr.size
 i = []
 for x in range(nsr):
@@ -171,35 +197,35 @@ sp.plotting.format(xlab='$E$ / V', ylab='$i$ / $\mu$A', legend=[0], show=1)
 
 
 
+# Main Power ON
+print('\n----MAIN POWER ON----')
+power.state('ON')
+time.sleep(2)
 
+##### (2) Rinsing
+## move_down / <<<LOOP start = suc / flush / equil_flush / suc = LOOP end>>> / move_up
 
-
-#### (2. Rinsing)
-#### move_down / suc / flush / equil_flush / suc / move_up
-print('\n----Rinse cell 1----')
-rinse = controller.Rinse(wait_time=[16,12,3.5,20,12,16])
+rinse = controller.Rinse(loop=2, wait_time=[16,12,3.5,12,12,16]) # change the number of loops
 rinse.run()
-time.sleep(wait-5)
-rinse.run()
-time.sleep(wait-5)
-rinse2 = controller.Rinse(wait_time=[16,12,0,6,12,16]) # rinsing without flushing
+time.sleep(5)
+
+rinse2 = controller.Rinse(loop=1, wait_time=[16,12,0,20,12,16]) # rinsing without flushing
 rinse2.run()
 time.sleep(wait-5)
 
-### (3. Drying)
-### move_down / blast / move_up
-print('\n----Dry cell 1----')
-dry = controller.Dry(wait_time=[7,20,7])
-dry.run()
+##### (3) N2 drying - nozzle 2 (20 loops for drying at medium flow)
+print('\n----\033[31mN2 drying\033[0m----')
+n2_drying = controller.N2(loop = 10, nozzle = 2, wait_time = [12,3,12], mode = 'single')
+n2_drying.run()
+
+# Main Power OFF (run or skip)
+print('\n----MAIN POWER OFF----')
+power.state('OFF')
+time.sleep(2)
 
 print('Finished')
 setup.disconnect()
 
+### <POWER,1,0>
 ### <PUMP1,1000,45000>
 ### <PUMP2,1000,45000>
-
-### Homming
-### print('\n----HOMMING----')
-### message_home = bytes('<homeGantry,0,0>', 'UTF-8')
-### move.send(message_home)
-### time.sleep(wait)

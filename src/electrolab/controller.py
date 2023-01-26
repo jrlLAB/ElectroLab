@@ -20,10 +20,10 @@ head_13 = np.array([-600, -680]) # [230113] [100, -680]
 nozzle12 = np.array([-280, 400]) # [230113]
 
 # Nitrogen nozzle global variables:
-nozzle_n2_n = 1 # nitrogen-blowing nozzle number
-nozzle12_n2 = np.array([-870, 0])
-head_23_n2 = np.array([-1740, -1140]) 
-head_13_n2 = np.array([100, -680]) 
+nozzle_n2_n = 1 # nitrogen-blowing nozzle number (1: drying, 2: bubbling)
+nozzle12_n2 = np.array([870, 0])
+head_23_n2 = np.array([-1560, -1140]) # [230125] [-1740, -1140]
+head_13_n2 = np.array([-100, -680])  # [230125] [100, -680]
 
 class Setup:
     '''
@@ -445,7 +445,7 @@ class N2(Motor):
         change.run()
         change_N2_nozzle(nozzle_n2_n, self.nozzle, wait_time=3)
         #print(state)
-        if self.nozzle == 1:
+        if self.nozzle == 2:
             print('N2 bubbling started')
             if self.wait_time[0]:
                 self.send(b'<ZAIRDRY, 100, +57000>') # med stream: 57000
@@ -468,7 +468,7 @@ class N2(Motor):
                 time.sleep(self.wait_time[2])
             print('N2 bubbling finished')
 
-        elif self.nozzle == 2:
+        elif self.nozzle == 1:
             print('N2 drying started')
             if self.wait_time[0]:
                 self.send(b'<ZAIRDRY, 100, +55000>')

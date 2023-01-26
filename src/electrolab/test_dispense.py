@@ -19,15 +19,15 @@ power.state('ON')
 time.sleep(2)
 
 # Homming
-print('\n----GANTRY HOMING----')
-message_home1 = bytes('<homeGantry,0,0>', 'UTF-8')
-move.send(message_home1)
-time.sleep(wait+5)
-
 print('\n----NOZZLES HOMING----')
 message_home2 = bytes('<homeDisp,0,0>', 'UTF-8')
 move.send(message_home2)
 time.sleep(wait+10)
+
+print('\n----GANTRY HOMING----')
+message_home1 = bytes('<homeGantry,0,0>', 'UTF-8')
+move.send(message_home1)
+time.sleep(wait+5)
 
 print('\n----Moving to cell 4 (dummy)----')
 pos = controller.Position_in_cell(4)

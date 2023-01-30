@@ -79,8 +79,9 @@ time.sleep(wait)
 
 ##### (1) N2 bubbling - nozzle 1 (10 loops for 3 minutes)
 print('\n----\033[31mN2 bubbling\033[0m----')
-n2_bubbling = controller.N2(loop = 3, nozzle = 2, wait_time = [12,3,12], mode = 'dual')
+n2_bubbling = controller.N2(loop = 6, nozzle = 2, wait_time = [12,3,12], mode = 'dual')
 n2_bubbling.run()
+time.sleep(3)
 
 # Main Power OFF (run or skip)
 print('\n----MAIN POWER OFF----')
@@ -213,8 +214,9 @@ time.sleep(wait-5)
 
 ##### (3) N2 drying - nozzle 2 (20 loops for drying at medium flow)
 print('\n----\033[31mN2 drying\033[0m----')
-n2_drying = controller.N2(loop = 8, nozzle = 1, wait_time = [12,3,12], mode = 'single')
+n2_drying = controller.N2(loop = 5, nozzle = 1, wait_time = [12,3,12], mode = 'single')
 n2_drying.run()
+time.sleep(3)
 
 # Main Power OFF (run or skip)
 print('\n----MAIN POWER OFF----')

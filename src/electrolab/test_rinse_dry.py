@@ -84,11 +84,11 @@ time.sleep(2)
 ##### (3) Rinsing
 ## move_down / <<<LOOP start = suc / flush / equil_flush / suc = LOOP end>>> / move_up
 
-rinse = controller.Rinse(loop=2, wait_time=[16,12,3.5,12,12,16]) # change the number of loops
+rinse = controller.Rinse(loop=2, wait_time=[16,13,2,5,12,16]) # change the number of loops
 rinse.run()
 time.sleep(5)
 
-rinse2 = controller.Rinse(loop=1, wait_time=[16,12,0,20,12,16]) # rinsing without flushing
+rinse2 = controller.Rinse(loop=1, wait_time=[16,12,0,5,0,16]) # rinsing without flushing
 rinse2.run()
 time.sleep(wait-5)
 

@@ -40,7 +40,7 @@ time.sleep(wait+5)
 ##### (1. Filling tube in dispenser 1)
 ## init / remove_drip / dispense / remove_drip2 / idle
 
-print('\n----Disp. nozzle (1, 2) initialization ----')
+print('\n----Disp. nozzle 1 & 2 initialization ----')
 
 dispense_fill_1 = controller.Dispense(nozzle=1, volume=4500, wait_time=[47,3,0,3,0], motor_values=[-39000,80,-8530,80,39000], p = p_linear)
 dispense_fill_1.run()

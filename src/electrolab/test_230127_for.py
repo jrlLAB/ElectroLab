@@ -34,6 +34,8 @@ for i in range(len(vol_list_1)):
         print(f'From nozzle 2, dispensing \033[33m{y} \033[0muL  \n')
         #dispense_2d.run()
 
+    input('\033[31m Press ENTER key to proceed... \033[0m \n')
+
 
 
 

@@ -110,9 +110,9 @@ for iii in range(len(vol_list_1)):
 
     print(f'Redox + Electrolyte \033[33m{x} \033[0muL and Electrolyte \033[33m{y} \033[0muL has been dispensed \n')
 
-    ##### (1) N2 bubbling - nozzle 1 (10 loops for 3 minutes)
+    ##### (1) N2 bubbling - nozzle 2 (10 loops for 3 minutes)
     print('\n----\033[31mN2 bubbling\033[0m----')
-    n2_bubbling = controller.N2(loop = 6, nozzle = 2, wait_time = [12,3,12], mode = 'dual')
+    n2_bubbling = controller.N2(loop = 10, nozzle = 2, wait_time = [12,3,12], mode = 'dual')
     n2_bubbling.run()
     time.sleep(3)
 
@@ -122,7 +122,7 @@ for iii in range(len(vol_list_1)):
     time.sleep(5)
 
 
-    time.sleep(60)
+    time.sleep(600)
 
 
     
@@ -138,7 +138,7 @@ for iii in range(len(vol_list_1)):
     # Path to the chi software, including extension .exe. Negletected by emstatpico
     path = 'C:/Users/Inkyu/Documents/221022_chi/chi1205b_mini2_LatestUpdate_2022/chi1205b.exe'
     # Folder where to save the data, it needs to be created previously
-    folder = 'C:/Users/Inkyu/Documents/230128_elab_5'                    ### (1) CHANGE THIS !!!!
+    folder = 'C:/Users/Inkyu/Documents/230203_elab_4'                    ### (1) CHANGE THIS !!!!
     # Initialization:
     pp.potentiostat.Setup(model, path, folder)
 
@@ -233,23 +233,43 @@ for iii in range(len(vol_list_1)):
     power.state('ON')
     time.sleep(2)
 
-    ##### (2) Rinsing
+    ##### (2) Initial Electrode Rinsing
     ## move_down / <<<LOOP start = suc / flush / equil_flush / suc = LOOP end>>> / move_up
 
-    rinse = controller.Rinse(loop=2, wait_time=[16,12,3.5,12,12,16]) # change the number of loops
+    rinse = controller.Rinse(loop=3, wait_time=[16,13,2,5,12,16]) # change the number of loops
     rinse.run()
     time.sleep(5)
 
-    rinse2 = controller.Rinse(loop=1, wait_time=[16,12,0,20,12,16]) # rinsing without flushing
-    rinse2.run()
-    time.sleep(wait-5)
 
-    ##### (3) N2 drying - nozzle 2 (20 loops for drying at medium flow)
+    ##### (3) Electrode strong rinsing with bubbling
+    # (SR1) filling reservoir with water
+    rinse3 = controller.Rinse(loop=1, wait_time=[16,0,1,5,0,16]) # change the number of loops
+    rinse3.run()
+    time.sleep(5)
+
+    # Dummy dispensing (SHOULD BE DONE between rinsing & N2 bubbling, owing to error)
+    dispense_2 = controller.Dispense(nozzle=2, volume=10, wait_time=[0,3,12,3,0], motor_values=[-39000,80,-8530,80,39000], p = p_linear)
+    dispense_2.run()
+    time.sleep(wait)
+
+    # (SR2) N2 bubbling - nozzle 2
+    print('\n----\033[31mN2 bubbling\033[0m----')
+    n2_bubbling = controller.N2(loop = 15, nozzle = 2, wait_time = [12,3,12], mode = 'dual')
+    n2_bubbling.run()
+    time.sleep(3)
+
+    # (SR3) Suction only
+    rinse2 = controller.Rinse(loop=1, wait_time=[16,12,0,5,0,16]) # suction only
+    rinse2.run()
+    time.sleep(5)
+
+    # (CAN BE DONE without dispensing...)
+
+    # (SR4) N2 drying - nozzle 1 (20 loops for drying at medium flow)
     print('\n----\033[31mN2 drying\033[0m----')
-    n2_drying = controller.N2(loop = 5, nozzle = 1, wait_time = [12,3,12], mode = 'single')
+    n2_drying = controller.N2(loop = 6, nozzle = 1, wait_time = [12,3,12], mode = 'single')
     n2_drying.run()
     time.sleep(10)
-
 
 
 

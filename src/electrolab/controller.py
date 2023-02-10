@@ -15,14 +15,14 @@ dy0 = 2800 # [220830] newly added
 dx = 2000
 dy = 4000
 head_12 = np.array([1920, 400]) # [230113]
-head_23 = np.array([-1520, -1140]) # [230113] [-1740, -1140]
+head_23 = np.array([-1650, -1140]) # [230209] [-1740, -1140] & [-1520, -1140]
 head_13 = np.array([-600, -680]) # [230113] [100, -680]
 nozzle12 = np.array([-280, 400]) # [230113]
 
 # Nitrogen nozzle global variables:
 nozzle_n2_n = 1 # nitrogen-blowing nozzle number (1: drying, 2: bubbling)
 nozzle12_n2 = np.array([870, 0])
-head_23_n2 = np.array([-1520, -1140]) # [230125] [-1740, -1140]
+head_23_n2 = np.array([-1680, -1140]) # [230209] [-1520, -1140]
 head_13_n2 = np.array([-100, -680])  # [230125] [100, -680]
 
 class Setup:
@@ -366,9 +366,9 @@ class Rinse(Motor):
         #global state
         move_down = b'<ZFLUSH, 100, +69300>' # [230116] +69200
         move_up = b'<ZFLUSH, 100, -69300>'
-        flush = b'<DC4, 65, 2700>' # [221206] tune 80, [230116] 80, 5000 (medium), 65, 2700 (small)
+        flush = b'<DC4, 90, 2300>' # [221206] tune 80, [230116] 80, 5000 (medium), 65, 2700 (small)
         equil_flush = b'<DC5, 255, 6000>'
-        suc = b'<DC2, 210, 20000>'
+        suc = b'<DC2, 210, 15000>' # [230209] 20000
 
         change = Nozzle_change(state, self.state)
         change.run()

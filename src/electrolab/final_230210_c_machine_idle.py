@@ -34,38 +34,48 @@ move.send(message_home1)
 time.sleep(wait+5)
 
 # (1) Emptying tubes
+print('\n \033[33m Now emptying tubes filled with samples \033[0m \n')
 message_n1 = bytes('<PUMP1,1000,45000>', 'UTF-8')
 message_n2 = bytes('<PUMP2,1000,45000>', 'UTF-8')
 move.send(message_n1)
 time.sleep(2)
 move.send(message_n2)
-time.sleep(80)
+time.sleep(60)
 
-print('\033[33m Change glass bottles (from dispensing to flushing ones) \033[0m \n')
+print('\n \033[33m Please change glass bottles (from dispensing to flushing ones) \033[0m \n')
 input('\033[31m Press ENTER key to proceed... \033[0m \n')
 
 # (2) Flushing tubes
-print('\n----Moving to cell 5 (dummy)----')
-pos = controller.Position_in_cell(5)
+print('\n----Moving to cell 4 (dummy)----')
+pos = controller.Position_in_cell(4)
 pos.run()
 time.sleep(wait+5)
 
-message_f1 = bytes('<PUMP1,1000,-50000>', 'UTF-8')
-message_f2 = bytes('<PUMP2,1000,-50000>', 'UTF-8')
-move.send(message_n1)
+message_move1 = bytes('<X,1000,-1920>', 'UTF-8')
+message_move2 = bytes('<Y,1000,-50>', 'UTF-8')
+move.send(message_move1)
 time.sleep(2)
-move.send(message_n2)
-time.sleep(80)
+move.send(message_move2)
+time.sleep(2)
 
-input('\033[31m Press ENTER key to proceed... \033[0m \n')
+print('\n \033[33m Now flushing tubes with flushing solvents \033[0m \n')
+message_f1 = bytes('<PUMP1,1000,-70000>', 'UTF-8')
+message_f2 = bytes('<PUMP2,1000,-70000>', 'UTF-8')
+move.send(message_f1)
+time.sleep(2)
+move.send(message_f2)
+time.sleep(60)
 
-# (2) Emptying tubes
+input('\n \033[31m Press ENTER key to proceed... \033[0m \n')
+
+# (3) Emptying tubes
+print('\n \033[33m Now emptying tubes filled with flushing solvents \033[0m \n')
 message_n1 = bytes('<PUMP1,1000,45000>', 'UTF-8')
 message_n2 = bytes('<PUMP2,1000,45000>', 'UTF-8')
 move.send(message_n1)
 time.sleep(2)
 move.send(message_n2)
-time.sleep(80)
+time.sleep(60)
 
 # Main Power OFF
 print('\n----MAIN POWER OFF----')

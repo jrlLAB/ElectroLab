@@ -68,17 +68,17 @@ for iii in range(len(vol_list_1)):
     print('\n----Dispense in cell 4 (dummy) from Nozzle 1 & 2----')
     dispense_1d = controller.Dispense(nozzle=1, volume=300, wait_time=[0,3,12,3,0], motor_values=[-39000,80,-8530,80,39000], p = p_linear)
     dispense_1d.run()
-    time.sleep(wait-3)
+    time.sleep(7)
 
-    dispense_2d = controller.Dispense(nozzle=2, volume=300, wait_time=[0,3,12,3,0], motor_values=[-39000,80,-9300,80,39000], p = p_linear)
+    dispense_2d = controller.Dispense(nozzle=2, volume=500, wait_time=[0,3,12,3,0], motor_values=[-39000,80,-9300,80,39000], p = p_linear)
     dispense_2d.run()
-    time.sleep(wait-3)
+    time.sleep(7)
 
     # Move to the cell
     print('\n----Moving to cell 2----')
     pos = controller.Position_in_cell(2)
     pos.run()
-    time.sleep(wait+5)
+    time.sleep(15)
 
     ### (0) CHANGE VOLUMES !!!!
     print('\n----Dispense in cell 2 from Nozzle 1 & 2----')
@@ -114,15 +114,15 @@ for iii in range(len(vol_list_1)):
     print('\n----\033[31mN2 bubbling\033[0m----')
     n2_bubbling = controller.N2(loop = 10, nozzle = 2, wait_time = [12,3,12], mode = 'dual')
     n2_bubbling.run()
-    time.sleep(3)
+    time.sleep(7)
 
     # Main Power OFF (run or skip)
     print('\n----MAIN POWER OFF----')
     power.state('OFF')
-    time.sleep(5)
+    time.sleep(7)
 
 
-    time.sleep(600)
+    time.sleep(450)
 
 
     
@@ -138,7 +138,7 @@ for iii in range(len(vol_list_1)):
     # Path to the chi software, including extension .exe. Negletected by emstatpico
     path = 'C:/Users/Inkyu/Documents/221022_chi/chi1205b_mini2_LatestUpdate_2022/chi1205b.exe'
     # Folder where to save the data, it needs to be created previously
-    folder = 'C:/Users/Inkyu/Documents/230203_elab_4'                    ### (1) CHANGE THIS !!!!
+    folder = 'C:/Users/Inkyu/Documents/2023_elab_data/230213_elab_3'                    ### (1) CHANGE THIS !!!!
     # Initialization:
     pp.potentiostat.Setup(model, path, folder)
 
@@ -231,43 +231,43 @@ for iii in range(len(vol_list_1)):
     # Main Power ON
     print('\n----MAIN POWER ON----')
     power.state('ON')
-    time.sleep(2)
+    time.sleep(5)
 
     ##### (2) Initial Electrode Rinsing
     ## move_down / <<<LOOP start = suc / flush / equil_flush / suc = LOOP end>>> / move_up
 
-    rinse = controller.Rinse(loop=3, wait_time=[16,13,2,5,12,16]) # change the number of loops
+    rinse = controller.Rinse(loop=4, wait_time=[16,13,2,5,12,16]) # change the number of loops
     rinse.run()
-    time.sleep(5)
+    time.sleep(7)
 
 
     ##### (3) Electrode strong rinsing with bubbling
     # (SR1) filling reservoir with water
     rinse3 = controller.Rinse(loop=1, wait_time=[16,0,1,5,0,16]) # change the number of loops
     rinse3.run()
-    time.sleep(5)
+    time.sleep(7)
 
     # Dummy dispensing (SHOULD BE DONE between rinsing & N2 bubbling, owing to error)
-    dispense_2 = controller.Dispense(nozzle=2, volume=10, wait_time=[0,3,12,3,0], motor_values=[-39000,80,-8530,80,39000], p = p_linear)
-    dispense_2.run()
-    time.sleep(wait)
+    #dispense_2 = controller.Dispense(nozzle=2, volume=10, wait_time=[0,3,12,3,0], motor_values=[-39000,80,-8530,80,39000], p = p_linear)
+    #dispense_2.run()
+    #time.sleep(wait)
 
     # (SR2) N2 bubbling - nozzle 2
     print('\n----\033[31mN2 bubbling\033[0m----')
-    n2_bubbling = controller.N2(loop = 15, nozzle = 2, wait_time = [12,3,12], mode = 'dual')
+    n2_bubbling = controller.N2(loop = 7, nozzle = 2, wait_time = [12,3,12], mode = 'dual')
     n2_bubbling.run()
-    time.sleep(3)
+    time.sleep(7)
 
     # (SR3) Suction only
     rinse2 = controller.Rinse(loop=1, wait_time=[16,12,0,5,0,16]) # suction only
     rinse2.run()
-    time.sleep(5)
+    time.sleep(7)
 
     # (CAN BE DONE without dispensing...)
 
     # (SR4) N2 drying - nozzle 1 (20 loops for drying at medium flow)
     print('\n----\033[31mN2 drying\033[0m----')
-    n2_drying = controller.N2(loop = 6, nozzle = 1, wait_time = [12,3,12], mode = 'single')
+    n2_drying = controller.N2(loop = 7, nozzle = 1, wait_time = [12,3,12], mode = 'single')
     n2_drying.run()
     time.sleep(10)
 

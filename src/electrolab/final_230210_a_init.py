@@ -42,10 +42,10 @@ time.sleep(wait+5)
 
 print('\n----Disp. nozzle 1 & 2 initialization ----')
 
-dispense_fill_1 = controller.Dispense(nozzle=1, volume=4500, wait_time=[47,3,0,3,0], motor_values=[-39000,80,-8530,80,39000], p = p_linear)
+dispense_fill_1 = controller.Dispense(nozzle=1, volume=200, wait_time=[47,3,0,3,0], motor_values=[-39000,80,-8530,80,39000], p = p_linear)
 dispense_fill_1.run()
 
-dispense_fill_2 = controller.Dispense(nozzle=2, volume=4500, wait_time=[47,3,0,3,0], motor_values=[-39000,80,-9230,80,39000], p = p_linear)
+dispense_fill_2 = controller.Dispense(nozzle=2, volume=1500, wait_time=[47,3,0,3,0], motor_values=[-39000,80,-9230,80,39000], p = p_linear)
 dispense_fill_2.run()
 
 dispense_1 = controller.Dispense(nozzle=1, volume=300, wait_time=[0,3,12,3,0], motor_values=[-39000,80,-8530,80,39000], p = p_linear)

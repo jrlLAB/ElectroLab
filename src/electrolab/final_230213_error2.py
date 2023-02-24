@@ -9,7 +9,7 @@ from scipy.optimize import curve_fit
 
 import os
 
-port = 'COM3'
+port = 'COM5'
 baud_rate = 115200
 
 setup = controller.Setup(port, baud_rate)
@@ -21,7 +21,7 @@ power = controller.MainPower()
 
 # Parameters related to peristaltic pumps
 p1_default = [19.801938114061617,0.964367848880719,1.167139063529185e-05,-2.873709837738213e-09]
-p2_default = [19.751968491759097,0.952312160718057,3.235820687217786e-05,-1.557420164573522e-08]
+p2_default = [11.765533598083050, 0.994151183002726, -2.200584843815698e-05, 5.268389857671134e-09]
 p_linear = [0,1,0,0]
 
 # Parameters related to liquid volumes & concentrations

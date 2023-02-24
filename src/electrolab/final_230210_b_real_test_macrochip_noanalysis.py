@@ -6,14 +6,38 @@ import numpy as np
 import matplotlib.pyplot as plt
 import softpotato as sp
 from scipy.optimize import curve_fit
-
 import os
+from scipy.stats import linregress
+import shutil
+import serial
+import time
+import dill
+from pathlib import Path
+from dotenv import load_dotenv
 
-port = 'COM5'
+####define com ports for controller and MUX + baudrate (keep at 115200 for both)
+controllerPort = 'COM5'
+muxPort = 'COM8'
 baud_rate = 115200
-
-setup = controller.Setup(port, baud_rate)
+###setup mux
+mux = serial.Serial(port=muxPort, baudrate=baud_rate, timeout=0.1)
+###setup controller
+setup = controller.Setup(controllerPort, baud_rate)
 setup.connect()
+
+#### This section of the code just cycles a couple of states in the multiplexer, it can be deleted (but may cause issues if not present)
+mux.write(bytes(str(1), 'utf-8'))
+msg = mux.readline()
+print(msg.decode('utf-8'))
+time.sleep(5)
+mux.write(bytes(str(3), 'utf-8'))
+msg = mux.readline()
+print(msg.decode('utf-8'))
+time.sleep(5)
+mux.write(bytes(str(5), 'utf-8'))
+msg = mux.readline()
+print(msg.decode('utf-8'))
+time.sleep(5)
 
 wait = 10
 move = controller.Motor()
@@ -27,8 +51,8 @@ p_linear = [0,1,0,0]
 # Parameters related to liquid volumes & concentrations
 conc_tag = np.array([25, 50, 75, 100]) 
 
-# total volume = 1.5 mL
-ratio_conc = 1.5
+# total volume = 1.0 mL (total volume = ratio_conc * 1 mL)
+ratio_conc = 1
 vol_list_1 = [250*ratio_conc, 500*ratio_conc, 750*ratio_conc, 1000*ratio_conc]
 vol_list_2 = [750*ratio_conc, 500*ratio_conc, 250*ratio_conc, 0*ratio_conc]
 
@@ -57,6 +81,13 @@ time.sleep(wait+5)
 
 ### Loop starts (set of concentrations / with cut-off volumes)
 
+###concentration values in 4 element list
+conc_used = [0.25e-6,0.5e-6,0.75e-6,1e-6]
+conc_str = ['250_uM','500_uM','750_uM','1_mM']
+
+###setup serial commands for the macro electrode chip
+serialNum = [11,12,13,14,15,16,17,18]
+
 for iii in range(len(vol_list_1)):
 
     # Move to the dummy cell
@@ -66,7 +97,7 @@ for iii in range(len(vol_list_1)):
     time.sleep(wait+5)
 
     print('\n----Dispense in cell 4 (dummy) from Nozzle 1 & 2----')
-    dispense_1d = controller.Dispense(nozzle=1, volume=300, wait_time=[0,3,12,3,0], motor_values=[-39000,80,-8530,80,39000], p = p_linear)
+    dispense_1d = controller.Dispense(nozzle=1, volume=500, wait_time=[0,3,12,3,0], motor_values=[-39000,80,-8530,80,39000], p = p_linear)
     dispense_1d.run()
     time.sleep(7)
 
@@ -112,7 +143,7 @@ for iii in range(len(vol_list_1)):
 
     ##### (1) N2 bubbling - nozzle 2 (10 loops for 3 minutes)
     print('\n----\033[31mN2 bubbling\033[0m----')
-    n2_bubbling = controller.N2(loop = 10, nozzle = 2, wait_time = [12,3,12], mode = 'dual')
+    n2_bubbling = controller.N2(loop = 5, nozzle = 2, wait_time = [12,3,12], mode = 'dual')
     n2_bubbling.run()
     time.sleep(7)
 
@@ -122,25 +153,40 @@ for iii in range(len(vol_list_1)):
     time.sleep(7)
 
 
-    time.sleep(450)
+    time.sleep(30)
 
 
     
     ##### E-CHEM PART
 
+
+    ################ Directory Setup ####################
+
+    directory = "Test1_FcMeOH_Macros_" + conc_str[iii]
+
+    ######################### EXPERIMENT INFO ########################
+    expInfo = "variable FcMeOH, 100 mM KNO3, Macros, 2/22, 200 um" + directory
+    ##################################################################
+
+    # Parent Directory path
+    parent_dir = "C:/Users/oliverrz/Desktop/ElectroLab/data/2023_02_22"
+    # Path
+    path = os.path.join(parent_dir, directory)
+    os.mkdir(path)
+    print("Directory '% s' created" % directory)
+    folder = str(path)
+    #####################################################
+
+
+
     ##### Setup
     # Select the potentiostat model to use:
     # emstatpico, chi1205b, chi760e
-    #model = 'chi760e'
-    model = 'chi1205b'
-    #model = 'emstatpico'
+    #### Potentiostat setup #####
+    model = 'chi760e'			 # Model to use
+    path_exe = 'C:/Users/oliverrz/Desktop/CHI/chi760e/chi760e.exe'	 # Path to the chi760e.exe
+    pp.potentiostat.Setup(model, path_exe, folder)	 # Setup
 
-    # Path to the chi software, including extension .exe. Negletected by emstatpico
-    path = 'C:/Users/Inkyu/Documents/221022_chi/chi1205b_mini2_LatestUpdate_2022/chi1205b.exe'
-    # Folder where to save the data, it needs to be created previously
-    folder = 'C:/Users/Inkyu/Documents/2023_elab_data/230213_elab_3'                    ### (1) CHANGE THIS !!!!
-    # Initialization:
-    pp.potentiostat.Setup(model, path, folder)
 
 
     ##### Experimental parameters:
@@ -150,79 +196,31 @@ for iii in range(len(vol_list_1)):
     Efin = -0.3     # V, final potential
     dE = 0.001      # V, potential increment
     nSweeps = 2     # number of sweeps
-    sens = 1e-5     # A/V, current sensitivity                              ### (2) CHANGE THIS !!!!
+    sens = 1e-7     # A/V, current sensitivity                              ### (2) CHANGE THIS !!!!
     header = 'CV'   # header for data file
 
 
     ##### Experiment:
-    sr = np.array([0.02, 0.05, 0.1, 0.2, 0.5])          # V/s, scan rate
+    sr = np.array([0.025, 0.05, 0.075, 0.1])          # V/s, scan rate
     # [0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18, 0.2]
     nsr = sr.size
     i = []
-    for x in range(nsr):
-        # initialize experiment:
-        fileName = 'CV_' + str(int(sr[x]*1000)) + 'mVs' + '_'+ str(int(conc_tag[iii]))# base file name for data file
-        cv = pp.potentiostat.CV(Eini, Ev1,Ev2, Efin, sr[x], dE, nSweeps, sens, fileName, header)
-        # Run experiment:
-        cv.run()
-        # load data to do the data analysis later
-        data = pp.load_data.CV(fileName + '.txt', folder, model)
-        i.append(data.i)
-    i = np.array(i)
-    i = i[:,:,0].T
-    E = data.E
+    for y in serialNum:
+        mux.write(bytes(str(y), 'utf-8'))
+        msg = mux.readline()
+        print(msg.decode('utf-8'))
+        time.sleep(5)
+
+        for x in range(nsr):
+            # initialize experiment:
+            fileName = 'Electrode'+ str(y-10) + '_CV_' + str(int(sr[x]*1000)) + 'mVs' + '_'+ conc_str[iii] # base file name for data file
+            cv = pp.potentiostat.CV(Eini, Ev1,Ev2, Efin, sr[x], dE, nSweeps, sens, fileName, header)
+            # Run experiment:
+            cv.run()
+            data = pp.load_data.CV(fileName + '.txt', folder, model)
+            # load data to do the data analysis later
 
 
-    ##### Data analysis
-    # Estimation of D with Randles-Sevcik
-    n = 1       # number of electrons
-    A = 0.071   # cm2, geometrical area
-    C = 1e-6    # mol/cm3, bulk concentration                                  ### (3) CHANGE THIS !!!!
-
-    # Showcases how powerful softpotato can be for fitting:
-    def DiffCoef(sr, D):
-        macro = sp.Macro(n, A, C, D)
-        rs = macro.RandlesSevcik(sr)
-        return rs
-        
-    iPk_an = np.max(i, axis=0)
-    iPk_ca = np.min(i, axis=0)
-    iPk = np.array([iPk_an, iPk_ca]).T
-    popt, pcov = curve_fit(DiffCoef, sr, iPk_an)
-    D = popt[0]
-
-    # Estimation of E0 from all CVs:
-    EPk_an = E[np.argmax(i, axis=0)]
-    EPk_ca = E[np.argmin(i, axis=0)]
-    E0 = np.mean((EPk_an+EPk_ca)/2)
-
-    #### Simulation with softpotato
-    iSim = []
-    for x in range(nsr):
-        wf = sp.technique.Sweep(Eini,Ev1, sr[x])
-        sim = sp.simulate.E(wf, n, A, E0, 0, C, D, D)
-        sim.run()
-        iSim.append(sim.i)
-    iSim = np.array(iSim).T
-    print(iSim.shape)
-    ESim = sim.E
-
-    ##### Printing results
-    print('\n\n----------Results----------')
-    print('D = {:.2f}x10^-6 cm2/s'.format(D*1e6))
-    print('E0 = {:.2f} mV'.format(E0*1e3))
-
-    ##### Plotting
-    srsqrt = np.sqrt(sr)
-    sp.plotting.plot(E, i*1e6, ylab='$i$ / $\mu$A', fig=1, show=0)
-    sp.plotting.plot(srsqrt, iPk*1e6, mark='o-', xlab=r'$\nu^{1/2}$ / V$^{1/2}$ s$^{-1/2}$', 
-                    ylab='$i$ / $\mu$A', fig=2, show=0)
-
-    plt.figure(3)
-    plt.plot(E, i*1e6)
-    plt.plot(wf.E, iSim*1e6, 'k--')
-    plt.title('Experiment (-) vs Simulation (--)')
-    sp.plotting.format(xlab='$E$ / V', ylab='$i$ / $\mu$A', legend=[0], show=0) # show 0 or 1
 
 
 
@@ -236,7 +234,7 @@ for iii in range(len(vol_list_1)):
     ##### (2) Initial Electrode Rinsing
     ## move_down / <<<LOOP start = suc / flush / equil_flush / suc = LOOP end>>> / move_up
 
-    rinse = controller.Rinse(loop=4, wait_time=[16,13,2,5,12,16]) # change the number of loops
+    rinse = controller.Rinse(loop=3, wait_time=[16,13,2,5,12,16]) # change the number of loops
     rinse.run()
     time.sleep(7)
 
@@ -254,7 +252,7 @@ for iii in range(len(vol_list_1)):
 
     # (SR2) N2 bubbling - nozzle 2
     print('\n----\033[31mN2 bubbling\033[0m----')
-    n2_bubbling = controller.N2(loop = 7, nozzle = 2, wait_time = [12,3,12], mode = 'dual')
+    n2_bubbling = controller.N2(loop = 5, nozzle = 2, wait_time = [12,3,12], mode = 'dual')
     n2_bubbling.run()
     time.sleep(7)
 

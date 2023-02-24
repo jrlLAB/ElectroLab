@@ -1,7 +1,7 @@
 import controller
 import time
 
-port = 'COM3'
+port = 'COM5'
 baud_rate = 115200
 
 setup = controller.Setup(port, baud_rate)
@@ -12,13 +12,13 @@ move = controller.Motor()
 power = controller.MainPower()
 
 p1_default = [19.801938114061617,0.964367848880719,1.167139063529185e-05,-2.873709837738213e-09]
-p2_default = [19.751968491759097,0.952312160718057,3.235820687217786e-05,-1.557420164573522e-08]
+p2_default = [11.765533598083050, 0.994151183002726, -2.200584843815698e-05, 5.268389857671134e-09]
 p_linear = [0,1,0,0]
 
 # Main Power ON
 print('\n----MAIN POWER ON----')
 power.state('ON')
-time.sleep(2)
+time.sleep(5)
 
 # Homming
 print('\n----NOZZLES HOMING----')
@@ -42,10 +42,10 @@ time.sleep(wait+5)
 
 print('\n----Disp. nozzle 1 & 2 initialization ----')
 
-dispense_fill_1 = controller.Dispense(nozzle=1, volume=200, wait_time=[47,3,0,3,0], motor_values=[-39000,80,-8530,80,39000], p = p_linear)
+dispense_fill_1 = controller.Dispense(nozzle=1, volume=4500, wait_time=[47,3,0,3,0], motor_values=[-39000,80,-8530,80,39000], p = p_linear)
 dispense_fill_1.run()
 
-dispense_fill_2 = controller.Dispense(nozzle=2, volume=1500, wait_time=[47,3,0,3,0], motor_values=[-39000,80,-9230,80,39000], p = p_linear)
+dispense_fill_2 = controller.Dispense(nozzle=2, volume=4500, wait_time=[47,3,0,3,0], motor_values=[-39000,80,-9230,80,39000], p = p_linear)
 dispense_fill_2.run()
 
 dispense_1 = controller.Dispense(nozzle=1, volume=300, wait_time=[0,3,12,3,0], motor_values=[-39000,80,-8530,80,39000], p = p_linear)
@@ -63,7 +63,7 @@ time.sleep(wait)
 # Main Power OFF
 print('\n----MAIN POWER OFF----')
 power.state('OFF')
-time.sleep(2)
+time.sleep(5)
 
 print('Finished')
 setup.disconnect()

@@ -366,7 +366,7 @@ class Rinse(Motor):
         #global state
         move_down = b'<ZFLUSH, 100, +69300>' # [230116] +69200
         move_up = b'<ZFLUSH, 100, -69300>'
-        flush = b'<DC4, 90, 2300>' # [221206] tune 80, [230116] 80, 5000 (medium), 65, 2700 (small)
+        flush = b'<DC4, 70, 1500>' # [221206] tune 80, [230116] 80, 5000 (medium), 65, 2700 (small)
         equil_flush = b'<DC5, 255, 6000>'
         suc = b'<DC2, 210, 15000>' # [230209] 20000
 
